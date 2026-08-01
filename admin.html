@@ -115,23 +115,33 @@
       }
 
       Object.keys(chats).forEach(uId => {
-        const chatData = chats[uId];
-        const messages = chatData.messages ? Object.values(chatData.messages) : [];
-        const lastMsg = messages.length > 0 ? messages[messages.length - 1].text : 'Немає повідомлень';
+  const chatData = chats[uId];
+  const messages = chatData.messages ? Object.values(chatData.messages) : [];
+  const lastMsg = messages.length > 0 ? messages[messages.length - 1].text : 'Немає повідомлень';
+  
+  // Беремо дані профілю, якщо вони є в Firebase
+  const profile = chatData.profile || {};
+  const userName = profile.name || `Клієнт (${uId.substr(0, 6)})`;
+  const avatarValue = profile.avatar || uId.substr(5, 2);
 
-        const card = document.createElement('div');
-        card.className = 'user-card' + (uId === activeUserId ? ' active' : '');
-        card.onclick = () => selectUser(uId);
+  const card = document.createElement('div');
+  card.className = 'user-card' + (uId === activeUserId ? ' active' : '');
+  card.onclick = () => selectUser(uId);
 
-        card.innerHTML = `
-          <div class="avatar">${uId.substr(5, 2).toUpperCase()}</div>
-          <div class="user-info">
-            <div class="user-id">Клієнт (${uId.substr(0, 8)})</div>
-            <div class="user-preview">${lastMsg}</div>
-          </div>
-        `;
-        userList.appendChild(card);
-      });
+  // Перевірка на посилання для аватарки
+  const isUrl = avatarValue.startsWith('http://') || avatarValue.startsWith('https://') || avatarValue.includes('.');
+  const avatarStyle = isUrl ? `style="background-image: url('${avatarValue}'); background-size: cover; color: transparent;"` : '';
+  const avatarText = isUrl ? '' : avatarValue.charAt(0).toUpperCase();
+
+  card.innerHTML = `
+    <div class="avatar" ${avatarStyle}>${avatarText}</div>
+    <div class="user-info">
+      <div class="user-id">${userName}</div>
+      <div class="user-preview">${lastMsg}</div>
+    </div>
+  `;
+  userList.appendChild(card);
+});
 
       if (activeUserId && chats[activeUserId] && chats[activeUserId].messages) {
         renderMessages(chats[activeUserId].messages);
