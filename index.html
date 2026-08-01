@@ -143,22 +143,23 @@
 
     // 2. ВІДПРАВКА ПОВІДОМЛЕННЯ
     function sendMessage() {
-      const text = chatInput.value.trim();
-      if (!text) return;
+  const text = chatInput.value.trim();
+  if (!text) return;
 
-      database.ref('chats/' + userId + '/messages').push({
-        sender: 'user',
-        text: text,
-        timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
-      });
+  // ВАЖЛИВО: Записуємо в гілку 'chats/', а не в 'messages'
+  database.ref('chats/' + userId + '/messages').push({
+    sender: 'user',
+    text: text,
+    timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+  });
 
-      database.ref('chats/' + userId + '/meta').set({
-        lastUpdate: new Date().toLocaleString('uk-UA'),
-        lastMessage: text
-      });
+  database.ref('chats/' + userId + '/meta').set({
+    lastUpdate: new Date().toLocaleString('uk-UA'),
+    lastMessage: text
+  });
 
-      chatInput.value = '';
-    }
+  chatInput.value = '';
+}
 
     sendBtn.onclick = sendMessage;
     chatInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
