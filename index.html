@@ -142,7 +142,6 @@
     const editStatus = document.getElementById('edit-status');
     const editAvatarUrl = document.getElementById('edit-avatar-url');
 
-   
     function updateProfileUI() {
   headerName.textContent = profileData.name;
   
@@ -179,14 +178,22 @@
     closeModalBtn.onclick = () => profileModal.classList.remove('active');
 
     saveProfileBtn.onclick = () => {
-      profileData.name = editName.value.trim() || 'Максим';
-      profileData.status = editStatus.value.trim() || 'онлайн';
-      profileData.avatar = editAvatarUrl.value.trim() || profileData.name.charAt(0);
+  profileData.name = editName.value.trim() || 'Користувач';
+  profileData.status = editStatus.value.trim() || 'онлайн';
+  profileData.avatar = editAvatarUrl.value.trim() || profileData.name.charAt(0);
 
-      localStorage.setItem('nexttalk_profile_data', JSON.stringify(profileData));
-      updateProfileUI();
-      profileModal.classList.remove('active');
-    };
+  // 1. Зберігаємо локально
+  localStorage.setItem('nexttalk_profile_data', JSON.stringify(profileData));
+  updateProfileUI();
+
+  // 2. ВІДПРАВЛЯЄМО В FIREBASE ДЛЯ АДМІНКИ 🚀
+  database.ref('chats/' + userId + '/profile').set({
+    name: profileData.name,
+    avatar: profileData.avatar
+  });
+
+  profileModal.classList.remove('active');
+};
 
     // Чат і повідомлення
     const messagesContainer = document.getElementById('messages-container');
