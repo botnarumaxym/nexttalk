@@ -142,16 +142,28 @@
     const editStatus = document.getElementById('edit-status');
     const editAvatarUrl = document.getElementById('edit-avatar-url');
 
+   
     function updateProfileUI() {
-      headerName.textContent = profileData.name;
-      
-      if (profileData.avatar.startsWith('http://') || profileData.avatar.startsWith('https://')) {
-        headerAvatar.style.backgroundImage = `url('${profileData.avatar}')`;
-        headerAvatar.textContent = '';
-      } else {
-        headerAvatar.style.backgroundImage = 'none';
-        headerAvatar.textContent = (profileData.avatar || profileData.name.charAt(0)).toUpperCase();
-      }
+  headerName.textContent = profileData.name;
+  
+  // 1. ПЕРЕВІРКА: Якщо текст починається з http:// або https:// або містить розширення (.jpg/.png)
+  if (profileData.avatar.startsWith('http://') || 
+      profileData.avatar.startsWith('https://') || 
+      profileData.avatar.includes('.')) {
+    
+    // Встановлюємо фото як фонову картинку
+    headerAvatar.style.backgroundImage = `url('${profileData.avatar}')`;
+    
+    // Очищаємо текст всередині кружечка (буква М зникає!)
+    headerAvatar.textContent = ''; 
+    
+  } else {
+    // 2. ІНАКШЕ (якщо це просто 1 літера або слово):
+    headerAvatar.style.backgroundImage = 'none'; // прибираємо фото
+    
+    // Показуємо літеру по центру
+    headerAvatar.textContent = (profileData.avatar || profileData.name.charAt(0)).toUpperCase();
+  }
     }
 
     updateProfileUI();
