@@ -5,24 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NextTalk</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css">
   <meta name="theme-color" content="#0f172a">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; height: 100vh; display: flex; justify-content: center; align-items: center; }
     .chat-container { width: 100%; max-width: 480px; height: 100vh; display: flex; flex-direction: column; background: #1e293b; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    .chat-header { padding: 16px 20px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-    .chat-title { font-size: 1.1rem; font-weight: bold; color: #38bdf8; }
-    #typing-status { font-size: 0.8rem; color: #38bdf8; font-style: italic; min-height: 1.1rem; }
+    
+    /* Шапка чату з аватаром та ім'ям */
+    .chat-header { padding: 14px 20px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; flex-shrink: 0; }
+    .header-info { display: flex; flex-direction: column; justify-content: center; }
+    .chat-title { font-size: 1.05rem; font-weight: bold; color: #f8fafc; }
+    .chat-subtitle { font-size: 0.8rem; color: #38bdf8; min-height: 1.1rem; font-style: normal; }
+
     .messages-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0f172a; }
     .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
     .msg.user { align-self: flex-end; background: #0284c7; color: #ffffff; border-bottom-right-radius: 2px; }
     .msg.admin { align-self: flex-start; background: #1e293b; color: #f8fafc; border: 1px solid #334155; border-bottom-left-radius: 2px; }
     .msg-time { font-size: 0.7rem; opacity: 0.75; text-align: right; margin-top: 4px; }
+    
     .input-container { padding: 14px; background: #1e293b; border-top: 1px solid #334155; display: flex; gap: 10px; }
     #message-input { flex: 1; padding: 12px 16px; background: #0f172a; border: 1px solid #334155; border-radius: 24px; color: white; outline: none; }
     #message-input:focus { border-color: #38bdf8; }
     #send-btn { background: #0284c7; color: white; border: none; padding: 0 20px; border-radius: 24px; font-weight: bold; cursor: pointer; }
+    
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
   </style>
@@ -31,9 +37,10 @@
 
   <div class="chat-container">
     <div class="chat-header">
-      <div>
-        <div class="chat-title">NextTalk</div>
-        <div id="typing-status"></div>
+      <div class="avatar">М</div>
+      <div class="header-info">
+        <div class="chat-title">Максим</div>
+        <div class="chat-subtitle" id="typing-status">онлайн</div>
       </div>
     </div>
 
@@ -75,7 +82,7 @@
 
     let typingTimeout = null;
 
-    // Індикатор вводу тексту від клієнта
+    // Відслідковування вводу клієнта
     messageInput.addEventListener('input', () => {
       database.ref('chats/' + userId + '/userTyping').set(true);
       clearTimeout(typingTimeout);
@@ -84,16 +91,18 @@
       }, 1500);
     });
 
-    // Слухаємо, чи друкує Адмін
+    // Слухаємо статус від Адміна
     database.ref('chats/' + userId + '/adminTyping').on('value', snapshot => {
       if (snapshot.val() === true) {
-        typingStatus.textContent = 'Максим друкує...';
+        typingStatus.textContent = 'друкує...';
+        typingStatus.style.color = '#38bdf8';
       } else {
-        typingStatus.textContent = '';
+        typingStatus.textContent = 'онлайн';
+        typingStatus.style.color = '#94a3b8';
       }
     });
 
-    // Слухаємо нові повідомлення
+    // Слухаємо повідомлення
     database.ref('chats/' + userId + '/messages').on('value', snapshot => {
       messagesContainer.innerHTML = '';
       const data = snapshot.val();
