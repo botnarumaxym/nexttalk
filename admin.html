@@ -10,7 +10,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #0f172a; color: #f8fafc; height: 100vh; display: flex; overflow: hidden; }
 
-    /* Ліва панель (Список користувачів) */
+    /* Ліва панель */
     .sidebar { width: 320px; background: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; }
     .sidebar-header { padding: 18px 20px; background: #0f172a; border-bottom: 1px solid #334155; font-size: 1.1rem; font-weight: bold; color: #38bdf8; }
     .user-list { flex: 1; overflow-y: auto; }
@@ -21,10 +21,11 @@
     .user-id { font-weight: 600; font-size: 0.95rem; color: #f8fafc; margin-bottom: 3px; }
     .user-preview { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* Права панель (Вікно чату) */
+    /* Права панель */
     .chat-area { flex: 1; display: flex; flex-direction: column; background: #0f172a; }
-    .chat-header { padding: 14px 20px; background: #1e293b; border-bottom: 1px solid #334155; font-weight: 600; font-size: 1rem; color: #f8fafc; }
-    
+    .chat-header { padding: 14px 20px; background: #1e293b; border-bottom: 1px solid #334155; font-weight: 600; font-size: 1rem; color: #f8fafc; display: flex; align-items: center; justify-content: space-between; }
+    #admin-typing-status { font-size: 0.85rem; color: #38bdf8; font-style: italic; }
+
     #messages-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
     .placeholder { margin: auto; color: #64748b; font-size: 1rem; text-align: center; }
 
@@ -45,7 +46,6 @@
 </head>
 <body>
 
-  <!-- Лівий список чатів -->
   <div class="sidebar">
     <div class="sidebar-header">NextTalk Manager</div>
     <div class="user-list" id="user-list">
@@ -53,9 +53,11 @@
     </div>
   </div>
 
-  <!-- Права область листування -->
   <div class="chat-area">
-    <div class="chat-header" id="active-user-header">Оберіть чат зі списку ліворуч</div>
+    <div class="chat-header">
+      <span id="active-user-header">Оберіть чат зі списку ліворуч</span>
+      <span id="admin-typing-status"></span>
+    </div>
     <div id="messages-area">
       <div class="placeholder">Діалог не обрано</div>
     </div>
@@ -65,7 +67,6 @@
     </div>
   </div>
 
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -86,12 +87,24 @@
     const userList = document.getElementById('user-list');
     const messagesArea = document.getElementById('messages-area');
     const activeUserHeader = document.getElementById('active-user-header');
+    const adminTypingStatus = document.getElementById('admin-typing-status');
     const adminInput = document.getElementById('admin-input');
     const sendBtn = document.getElementById('send-btn');
 
     let activeUserId = null;
+    let adminTypingTimeout = null;
 
-    // Слухаємо всі чати в реальному часі
+    // Відслідковування вводу адміна
+    adminInput.addEventListener('input', () => {
+      if (!activeUserId) return;
+      database.ref('chats/' + activeUserId + '/adminTyping').set(true);
+      clearTimeout(adminTypingTimeout);
+      adminTypingTimeout = setTimeout(() => {
+        database.ref('chats/' + activeUserId + '/adminTyping').set(false);
+      }, 1500);
+    });
+
+    // Список усіх чатів
     database.ref('chats').on('value', snapshot => {
       userList.innerHTML = '';
       const chats = snapshot.val();
@@ -120,30 +133,36 @@
         userList.appendChild(card);
       });
 
-      // Якщо користувач вже обраний, оновлюємо його повідомлення в реальному часі
       if (activeUserId && chats[activeUserId] && chats[activeUserId].messages) {
         renderMessages(chats[activeUserId].messages);
       }
     });
 
-    // Вибір користувача зі списку
+    // Вибір чату
     function selectUser(uId) {
+      if (activeUserId) {
+        database.ref('chats/' + activeUserId + '/userTyping').off();
+      }
+
       activeUserId = uId;
       activeUserHeader.textContent = 'Чат з: ' + uId;
       adminInput.disabled = false;
       sendBtn.disabled = false;
 
-      // Підсвічуємо активну картку
-      document.querySelectorAll('.user-card').forEach(c => c.classList.remove('active'));
-      event.currentTarget.classList.add('active');
+      // Слухаємо, чи друкує обраний клієнт
+      database.ref('chats/' + uId + '/userTyping').on('value', snapshot => {
+        if (snapshot.val() === true) {
+          adminTypingStatus.textContent = 'клієнт друкує...';
+        } else {
+          adminTypingStatus.textContent = '';
+        }
+      });
 
-      // Зчитуємо повідомлення цього користувача
       database.ref('chats/' + activeUserId + '/messages').once('value', snapshot => {
         renderMessages(snapshot.val() || {});
       });
     }
 
-    // Відображення повідомлень у вікні чату
     function renderMessages(messagesObj) {
       messagesArea.innerHTML = '';
       const msgsArray = Object.values(messagesObj);
@@ -167,11 +186,12 @@
       messagesArea.scrollTop = messagesArea.scrollHeight;
     }
 
-    // Відправка відповіді адміністратора
+    // Відправка повідомлення від адміна
     function sendAdminMessage() {
       const text = adminInput.value.trim();
       if (!text || !activeUserId) return;
 
+      database.ref('chats/' + activeUserId + '/adminTyping').set(false);
       database.ref('chats/' + activeUserId + '/messages').push({
         sender: 'admin',
         text: text,
