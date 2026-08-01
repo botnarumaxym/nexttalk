@@ -1,0 +1,489 @@
+/* Базове скидання та налаштування фону */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+/* Контейнер картки */
+.profile-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 350px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+/* шапка з банером та аватаркою */
+.card-header{
+    position: relative;
+    text-align: center;
+}
+
+.banner-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+}
+
+.avatar-img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 4px solid #ffffff;
+    object-fit: cover;
+    position: absolute;
+    bottom: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffffff;
+}
+
+/*Основне контентне поле */
+.card-body {
+    padding: 55px 24px 24px 24px;
+    text-align: center;
+}
+
+.user-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+}
+
+.user-role {
+    font-size: 0.9rem;
+    color: #0066cc;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.user-bio{
+    font-size: 0.85rem;
+    color: #666666;
+    line-height: 1.4;
+    margin-bottom: 20px;
+}
+
+/* Список статистики */
+.stats-list {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    padding: 16px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.stat-item{
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value{
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.stat-label{
+    font-size: 0.75rem;
+    color: #888888;
+    margin-top: 2px;
+}
+
+/* Кнопки */
+.card-actions{
+    display: flex;
+    gap: 12px;
+}
+
+.btn{
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-primary{
+    background-color: #0066cc;
+    color: #ffffff;
+}
+
+.btn-primary:hover{
+    background-color: #0052a3;
+}
+
+.btn-secondary{
+    background-color: #f0f2f5;
+    color: #333333;
+}
+
+.btn-secondary:hover{
+    background-color: #e4e6eb;
+}
+
+.btn-primary.subscribed {
+    background-color: #28a745; /* Зелений колір при підписці */
+    color: #ffffff;
+}
+
+.btn-primary.subscribed:hover {
+    background-color: #218838; /* Трохи темніший зелений при наведенні */
+}
+
+.btn-primary.subscribed {
+    background-color: #28a745;
+    color: #ffffff;
+}
+
+.btn-primary.subscribed:hover {
+    background-color: #218838;
+}
+
+/* --- Стилі для модального вікна --- */
+
+/* Затемнення фону */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Напівпрозорий чорний */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none; /* Сховано за замовчуванням */
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+/* Активний стан (коли вікно відкрите) */
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Картка модального вікна */
+.modal-card {
+    background-color: #ffffff;
+    width: 90%;
+    max-width: 400px;
+    padding: 24px;
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-card {
+    transform: translateY(0);
+}
+
+.modal-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #888;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    color: #000;
+}
+
+.modal-card h3 {
+    margin-bottom: 4px;
+    color: #1a1a1a;
+}
+
+.modal-subtitle {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+/* Поле введення тексту */
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: none;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.2s ease;
+}
+
+textarea:focus {
+    border-color: #0066cc;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* --- Верхня навігація --- */
+.top-nav {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.btn-account {
+    background-color: #ffffff;
+    color: #333;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+}
+
+.btn-account:hover {
+    background-color: #0066cc;
+    color: #ffffff;
+}
+
+/* --- Стилі для сторінки входу (login.html) --- */
+.login-card {
+    background: #ffffff;
+    padding: 32px;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.login-card h2 {
+    margin-bottom: 6px;
+    color: #1a1a1a;
+}
+
+.login-subtitle {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #444;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.form-group input:focus {
+    border-color: #0066cc;
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.login-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.login-footer a {
+    color: #0066cc;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}
+/* Блок проєктів */
+.projects-section {
+    width: 100%;
+    max-width: 350px;
+    margin-top: 20px;
+}
+
+.projects-section h3 {
+    font-size: 1.1rem;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.projects-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.project-card {
+    background: #ffffff;
+    padding: 14px 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.project-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+}
+
+.empty-msg {
+    font-size: 0.85rem;
+    color: #888;
+    text-align: center;
+}
+/* Загальний контейнер для картки та проєктів */
+.main-content {
+  max-width: 1100px;  /* Обмежуємо максимальну ширину */
+  margin: 40px auto;  /* Центруємо на сторінці */
+  padding: 0 20px;
+  
+  display: grid;
+  grid-template-columns: 340px 1fr; /* Картка 340px, проєкти займають решту */
+  gap: 32px;            /* Відстань між карткою та проєктами */
+  align-items: start;   /* ПРИВ'ЯЗКА ДО ВЕРХУ: піднімає проєкти на один рівень з карткою */
+}
+
+/* Блок проєктів */
+.projects-section {
+  width: 100%;          /* Розширюємо блок на всю доступну ширину */
+}
+
+.projects-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+.stats-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column; /* Цифра зверху, текст знизу */
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.stat-number {
+  font-weight: bold;
+  font-size: 18px;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #777;
+}
+
+.stat-link:hover .stat-number {
+  color: #0066cc; /* Підсвічуємо цифру при наведенні */
+}
+/* Ефект наведення на статистику проєктів */
+.clickable-stat {
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.clickable-stat:hover {
+    background-color: #f0f4f8;
+}
+
+/* Блок проєктів прихований за замовчуванням */
+.projects-section {
+    width: 100%;
+    max-width: 350px;
+    margin-top: 16px;
+    display: none; /* 🔴 Сховано за замовчуванням */
+}
+
+/* Клас, який JS буде додавати при кліку */
+.projects-section.visible {
+    display: block; /* 🟢 Показуємо блок */
+}
+/* Курсор-вказівник для статистики проєктів */
+.clickable-stat {
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.clickable-stat:hover {
+    background-color: #f0f4f8;
+}
+
+/* Приховано за замовчуванням */
+.projects-section {
+    width: 100%;
+    max-width: 350px;
+    margin-top: 16px;
+    display: none; /* Заховано */
+}
+
+/* Відображення при додаванні класу visible */
+.projects-section.visible {
+    display: block !important; /* Напряму показуємо блок */
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Панель адміністратора</title>
+  <style>
+    body { font-family: sans-serif; background-color: #f4f6f8; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    h1 { text-align: center; color: #333; }
+    .msg-card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid #007bff; }
+    .msg-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; color: #555; }
+    .msg-time { font-size: 0.8em; color: #888; }
+    .msg-text { color: #222; white-space: pre-wrap; }
+  </style>
+  <link rel="manifest" href="admin-manifest.json">
+<meta name="theme-color" content="#28a745">
+</head>
+<body>
+
+  <div class="container">
+    <h1>📥 Вхідні повідомлення</h1>
+    <div id="messages-list">
+      <p style="text-align:center;">Завантаження повідомлень...</p>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBuGDd0y2y4Tkf-tcBU_ZshX2uUGK3uQWQ",
+      authDomain: "my-website-5d781.firebaseapp.com",
+      databaseURL: "https://my-website-5d781-default-rtdb.firebaseio.com",
+      projectId: "my-website-5d781",
+      storageBucket: "my-website-5d781.firebasestorage.app",
+      messagingSenderId: "111570797151",
+      appId: "1:111570797151:web:5d23161a445c946ccb51ea"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const messagesList = document.getElementById('messages-list');
+
+    // Оновлення списку в реальному часі
+    database.ref('messages').on('value', function(snapshot) {
+      messagesList.innerHTML = '';
+      const data = snapshot.val();
+
+      if (data) {
+        const entries = Object.entries(data).reverse();
+        entries.forEach(function([id, item]) {
+          const card = document.createElement('div');
+          card.className = 'msg-card';
+          card.innerHTML = `
+            <div class="msg-header">
+              <span>👤 ${item.name}</span>
+              <span class="msg-time">${item.timestamp}</span>
+            </div>
+            <div class="msg-text">${item.message}</div>
+          `;
+          messagesList.appendChild(card);
+        });
+      } else {
+        messagesList.innerHTML = '<p style="text-align:center;">Повідомлень поки немає.</p>';
+      }
+    });
+  </script>
+</body>
+</html>

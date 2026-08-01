@@ -1,0 +1,16 @@
+{
+  "name": "Адмінка Чату",
+  "short_name": "Адмінка",
+  "start_url": "./admin.html",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#28a745",
+  "description": "Панель управління повідомленнями",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1828/1828859.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
