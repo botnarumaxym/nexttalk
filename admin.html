@@ -3,28 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Панель адміністратора</title>
-  <style>
-    body { font-family: sans-serif; background-color: #f4f6f8; padding: 20px; }
-    .container { max-width: 600px; margin: 0 auto; }
-    h1 { text-align: center; color: #333; }
-    .msg-card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid #007bff; }
-    .msg-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; color: #555; }
-    .msg-time { font-size: 0.8em; color: #888; }
-    .msg-text { color: #222; white-space: pre-wrap; }
-  </style>
+  <title>NextTalk Manager</title>
   <link rel="manifest" href="admin-manifest.json">
-<meta name="theme-color" content="#1e293b">
+  <meta name="theme-color" content="#0f172a">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; height: 100vh; display: flex; overflow: hidden; }
+
+    /* Ліва панель (Список користувачів) */
+    .sidebar { width: 320px; background: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; }
+    .sidebar-header { padding: 18px 20px; background: #0f172a; border-bottom: 1px solid #334155; font-size: 1.1rem; font-weight: bold; color: #38bdf8; }
+    .user-list { flex: 1; overflow-y: auto; }
+    .user-card { padding: 14px 16px; border-bottom: 1px solid #334155; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 12px; }
+    .user-card:hover, .user-card.active { background: #334155; }
+    .avatar { width: 42px; height: 42px; border-radius: 50%; background: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+    .user-info { flex: 1; overflow: hidden; }
+    .user-id { font-weight: 600; font-size: 0.95rem; color: #f8fafc; margin-bottom: 3px; }
+    .user-preview { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Права панель (Вікно чату) */
+    .chat-area { flex: 1; display: flex; flex-direction: column; background: #0f172a; }
+    .chat-header { padding: 14px 20px; background: #1e293b; border-bottom: 1px solid #334155; font-weight: 600; font-size: 1rem; color: #f8fafc; }
+    
+    #messages-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .placeholder { margin: auto; color: #64748b; font-size: 1rem; text-align: center; }
+
+    .msg { max-width: 70%; padding: 10px 14px; border-radius: 12px; font-size: 0.93rem; line-height: 1.4; word-wrap: break-word; }
+    .msg.user { align-self: flex-start; background: #1e293b; color: #f8fafc; border: 1px solid #334155; border-bottom-left-radius: 2px; }
+    .msg.admin { align-self: flex-end; background: #0284c7; color: #ffffff; border-bottom-right-radius: 2px; }
+    .msg-time { font-size: 0.68rem; opacity: 0.75; text-align: right; margin-top: 4px; }
+
+    .input-area { padding: 14px 20px; background: #1e293b; border-top: 1px solid #334155; display: flex; gap: 10px; }
+    #admin-input { flex: 1; padding: 12px 16px; background: #0f172a; border: 1px solid #334155; border-radius: 24px; color: white; outline: none; }
+    #admin-input:focus { border-color: #38bdf8; }
+    #send-btn { background: #0284c7; color: white; border: none; padding: 0 20px; border-radius: 24px; font-weight: bold; cursor: pointer; }
+    #send-btn:disabled { background: #334155; cursor: not-allowed; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>📥 Вхідні повідомлення</h1>
-    <div id="messages-list">
-      <p style="text-align:center;">Завантаження повідомлень...</p>
+  <!-- Лівий список чатів -->
+  <div class="sidebar">
+    <div class="sidebar-header">NextTalk Manager</div>
+    <div class="user-list" id="user-list">
+      <div class="placeholder">Завантаження чатів...</div>
     </div>
   </div>
 
+  <!-- Права область листування -->
+  <div class="chat-area">
+    <div class="chat-header" id="active-user-header">Оберіть чат зі списку ліворуч</div>
+    <div id="messages-area">
+      <div class="placeholder">Діалог не обрано</div>
+    </div>
+    <div class="input-area">
+      <input type="text" id="admin-input" placeholder="Напишіть відповідь..." disabled autocomplete="off">
+      <button id="send-btn" disabled>Надіслати</button>
+    </div>
+  </div>
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -39,33 +80,109 @@
       appId: "1:111570797151:web:5d23161a445c946ccb51ea"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const messagesList = document.getElementById('messages-list');
 
-    // Оновлення списку в реальному часі
-    database.ref('messages').on('value', function(snapshot) {
-      messagesList.innerHTML = '';
-      const data = snapshot.val();
+    const userList = document.getElementById('user-list');
+    const messagesArea = document.getElementById('messages-area');
+    const activeUserHeader = document.getElementById('active-user-header');
+    const adminInput = document.getElementById('admin-input');
+    const sendBtn = document.getElementById('send-btn');
 
-      if (data) {
-        const entries = Object.entries(data).reverse();
-        entries.forEach(function([id, item]) {
-          const card = document.createElement('div');
-          card.className = 'msg-card';
-          card.innerHTML = `
-            <div class="msg-header">
-              <span>👤 ${item.name}</span>
-              <span class="msg-time">${item.timestamp}</span>
-            </div>
-            <div class="msg-text">${item.message}</div>
-          `;
-          messagesList.appendChild(card);
-        });
-      } else {
-        messagesList.innerHTML = '<p style="text-align:center;">Повідомлень поки немає.</p>';
+    let activeUserId = null;
+
+    // Слухаємо всі чати в реальному часі
+    database.ref('chats').on('value', snapshot => {
+      userList.innerHTML = '';
+      const chats = snapshot.val();
+
+      if (!chats) {
+        userList.innerHTML = '<div class="placeholder">Активних чатів немає</div>';
+        return;
+      }
+
+      Object.keys(chats).forEach(uId => {
+        const chatData = chats[uId];
+        const messages = chatData.messages ? Object.values(chatData.messages) : [];
+        const lastMsg = messages.length > 0 ? messages[messages.length - 1].text : 'Немає повідомлень';
+
+        const card = document.createElement('div');
+        card.className = 'user-card' + (uId === activeUserId ? ' active' : '');
+        card.onclick = () => selectUser(uId);
+
+        card.innerHTML = `
+          <div class="avatar">${uId.substr(5, 2).toUpperCase()}</div>
+          <div class="user-info">
+            <div class="user-id">Клієнт (${uId.substr(0, 8)})</div>
+            <div class="user-preview">${lastMsg}</div>
+          </div>
+        `;
+        userList.appendChild(card);
+      });
+
+      // Якщо користувач вже обраний, оновлюємо його повідомлення в реальному часі
+      if (activeUserId && chats[activeUserId] && chats[activeUserId].messages) {
+        renderMessages(chats[activeUserId].messages);
       }
     });
+
+    // Вибір користувача зі списку
+    function selectUser(uId) {
+      activeUserId = uId;
+      activeUserHeader.textContent = 'Чат з: ' + uId;
+      adminInput.disabled = false;
+      sendBtn.disabled = false;
+
+      // Підсвічуємо активну картку
+      document.querySelectorAll('.user-card').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      // Зчитуємо повідомлення цього користувача
+      database.ref('chats/' + activeUserId + '/messages').once('value', snapshot => {
+        renderMessages(snapshot.val() || {});
+      });
+    }
+
+    // Відображення повідомлень у вікні чату
+    function renderMessages(messagesObj) {
+      messagesArea.innerHTML = '';
+      const msgsArray = Object.values(messagesObj);
+
+      if (msgsArray.length === 0) {
+        messagesArea.innerHTML = '<div class="placeholder">Повідомлень немає</div>';
+        return;
+      }
+
+      msgsArray.forEach(msg => {
+        const div = document.createElement('div');
+        const isAdmin = msg.sender === 'admin';
+        div.className = 'msg ' + (isAdmin ? 'admin' : 'user');
+        div.innerHTML = `
+          <div>${msg.text}</div>
+          <div class="msg-time">${msg.timestamp || ''}</div>
+        `;
+        messagesArea.appendChild(div);
+      });
+
+      messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    // Відправка відповіді адміністратора
+    function sendAdminMessage() {
+      const text = adminInput.value.trim();
+      if (!text || !activeUserId) return;
+
+      database.ref('chats/' + activeUserId + '/messages').push({
+        sender: 'admin',
+        text: text,
+        timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+      });
+
+      adminInput.value = '';
+    }
+
+    sendBtn.onclick = sendAdminMessage;
+    adminInput.onkeypress = (e) => { if (e.key === 'Enter') sendAdminMessage(); };
   </script>
 </body>
 </html>
