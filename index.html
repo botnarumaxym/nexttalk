@@ -66,7 +66,7 @@
     .msg-meta { display: flex; align-items: center; justify-content: flex-end; gap: 3px; float: right; margin-left: 10px; margin-top: 4px; height: 14px; }
     .msg-time { font-size: 0.68rem; color: #7f91a4; }
     .msg.user .msg-time { color: #86a8c8; }
-    .ticks { font-size: 0.75rem; color: #64b5f6; line-height: 1; }
+    .ticks { font-size: 0.8rem; font-weight: bold; line-height: 1; margin-left: 2px; }
 
     .input-container { padding: 10px 12px; background: #17212b; border-top: 1px solid #0e1621; display: flex; align-items: center; gap: 8px; }
     #message-input { flex: 1; padding: 10px 16px; background: #242f3d; border: 1px solid transparent; border-radius: 22px; color: #ffffff; outline: none; font-size: 0.95rem; }
@@ -190,7 +190,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <!-- Бібліотека для Push-сповіщень Firebase Messaging -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 
   <script>
@@ -209,7 +208,7 @@
     const database = firebase.database();
     const messaging = firebase.messaging();
 
-    // Функція запиту дозволу на сповіщення
+    // Отримання Push-токена
     function requestNotificationPermission(uid) {
       Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
@@ -217,7 +216,7 @@
             if (currentToken) {
               database.ref('chats/' + uid + '/fcmToken').set(currentToken);
             }
-          }).catch(err => console.log('Помилка отримання FCM токена:', err));
+          }).catch(err => console.log('FCM Token error:', err));
         }
       });
     }
@@ -310,8 +309,23 @@
         authScreen.style.display = 'none';
         chatsScreen.style.display = 'flex';
         
-        // Запитуємо дозвіл на сповіщення після входу
         requestNotificationPermission(user.uid);
+
+        // Відстеження присутності (Online / Last Seen)
+        const userStatusRef = database.ref('chats/' + user.uid + '/status');
+        database.ref('.info/connected').on('value', (snap) => {
+          if (snap.val() === true) {
+            userStatusRef.onDisconnect().set({
+              online: false,
+              lastSeen: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            userStatusRef.set({
+              online: true,
+              lastSeen: firebase.database.ServerValue.TIMESTAMP
+            });
+          }
+        });
 
         database.ref('chats/' + user.uid + '/profile').on('value', snapshot => {
           const val = snapshot.val();
@@ -373,33 +387,57 @@
         }, 1500);
       };
 
+      // Відображення стану адміна (Друкує / Онлайн / Last Seen)
       database.ref('chats/' + uid + '/adminTyping').on('value', snapshot => {
         if (snapshot.val() === true) {
           typingStatus.textContent = 'друкує...';
           typingStatus.classList.add('typing');
         } else {
-          typingStatus.textContent = 'онлайн';
+          database.ref('admin/status').on('value', statusSnap => {
+            const st = statusSnap.val();
+            if (st && st.online) {
+              typingStatus.textContent = 'онлайн';
+            } else if (st && st.lastSeen) {
+              const date = new Date(st.lastSeen);
+              typingStatus.textContent = 'був(ла) ' + date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+            } else {
+              typingStatus.textContent = 'офлайн';
+            }
+          });
           typingStatus.classList.remove('typing');
         }
       });
 
+      // Зчитування повідомлень + Позначення прочитаних
       database.ref('chats/' + uid + '/messages').on('value', snapshot => {
         messagesContainer.innerHTML = '';
         const data = snapshot.val();
         if (!data) return;
 
-        const msgs = Object.values(data);
-        if (msgs.length > 0) {
-          const last = msgs[msgs.length - 1];
+        const entries = Object.entries(data);
+        if (entries.length > 0) {
+          const last = entries[entries.length - 1][1];
           listPreview.textContent = last.text;
           listTime.textContent = last.timestamp || '';
         }
 
-        msgs.forEach(msg => {
+        entries.forEach(([msgId, msg]) => {
           const isMe = msg.sender === 'user';
+
+          // Якщо повідомлення від адміна й воно ще не прочитане — ставимо read: true
+          if (!isMe && !msg.read) {
+            database.ref('chats/' + uid + '/messages/' + msgId).update({ read: true });
+          }
+
           const msgDiv = document.createElement('div');
           msgDiv.className = 'msg ' + (isMe ? 'user' : 'admin');
-          const ticksHtml = isMe ? '<span class="ticks">✓✓</span>' : '';
+          
+          let ticksHtml = '';
+          if (isMe) {
+            ticksHtml = msg.read 
+              ? '<span class="ticks" style="color: #64b5f6;">✓✓</span>' 
+              : '<span class="ticks" style="color: #7f91a4;">✓</span>';
+          }
           
           msgDiv.innerHTML = `
             <span>${msg.text}</span>
@@ -422,7 +460,8 @@
         database.ref('chats/' + uid + '/messages').push({
           sender: 'user',
           text: text,
-          timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+          timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
+          read: false
         });
 
         messageInput.value = '';
