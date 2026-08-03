@@ -1,15 +1,15 @@
 {
   "name": "NextTalk",
   "short_name": "NextTalk",
-  "start_url": "/nexttalk/index.html",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0d1b2a",
   "icons": [
     {
       "src": "photo.jpg",
       "sizes": "1024x1024",
-      "type": "image/jpeg"
+      "type": "image/jpg"
     }
   ]
 }
