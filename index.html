@@ -231,18 +231,29 @@
       }
     }
 
-    // Генерація та збереження Push-токена в базу
-    function requestNotificationPermission(uid) {
-      Notification.requestPermission().then((permission) => {
-        if (permission === 'granted') {
-          // ⚠️ ЗМІНИ РЯДОК НИЖЧЕ: Встави свій Key pair з Firebase Консолі
-          messaging.getToken({ vapidKey: 'BFpbUwteA45x4fgpStXe6KU9uZXTKG_mdX5h-7NmO6mgDkEiMUED4iaktuz-RNrd2s5s_qL__r8UT-Wn01xd0T0' }).then((currentToken) => {
-            if (currentToken) {
-              database.ref('chats/' + uid + '/fcmToken').set(currentToken);
-            }
-          }).catch(err => console.log('FCM Token error:', err));
-        }
-      });
+   // ОНОВЛЕНА ФУНКЦІЯ (з правильним шляхом до Service Worker)
+function requestNotificationPermission(uid) {
+  Notification.requestPermission().then((permission) => {
+    if (permission === 'granted') {
+      // Спочатку реєструємо Service Worker з правильним шляхом підпапки /nexttalk/
+      navigator.serviceWorker.register('/nexttalk/firebase-messaging-sw.js')
+        .then((registration) => {
+          // Передаємо реєстрацію у Firebase Messaging
+          return messaging.getToken({ 
+            vapidKey: 'BFpbUwteA45x4fgpStXe6KU9uZXTKG_mdX5h-7NmO6mgDkEiMUED4iaktuz-RNrd2s5s_qL__r8UT-Wn01xd0T0',
+            serviceWorkerRegistration: registration 
+          });
+        })
+        .then((currentToken) => {
+          if (currentToken) {
+            console.log('Токен успішно отримано:', currentToken);
+            database.ref('chats/' + uid + '/fcmToken').set(currentToken);
+          }
+        })
+        .catch(err => console.log('FCM Token error:', err));
+    }
+  });
+}
     }
 
     const authScreen = document.getElementById('auth-screen');
