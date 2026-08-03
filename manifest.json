@@ -1,7 +1,7 @@
 {
   "name": "NextTalk",
   "short_name": "NextTalk",
-  "start_url": "/nexttalk/admin.html",
+  "start_url": "/nexttalk/index.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
