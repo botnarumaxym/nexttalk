@@ -208,10 +208,34 @@
     const database = firebase.database();
     const messaging = firebase.messaging();
 
-    // Отримання Push-токена
+    // Генерація ТОЧНОГО часу (наприклад: 14:32:05)
+    function getExactTime() {
+      const now = new Date();
+      return now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    // Форматування точної дати і часу для статусу Last Seen
+    function formatExactLastSeen(timestamp) {
+      if (!timestamp) return 'офлайн';
+      const date = new Date(timestamp);
+      const now = new Date();
+      
+      const isToday = date.toDateString() === now.toDateString();
+      const timeStr = date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+
+      if (isToday) {
+        return 'був(ла) сьогодні о ' + timeStr;
+      } else {
+        const dateStr = date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' });
+        return 'був(ла) ' + dateStr + ' о ' + timeStr;
+      }
+    }
+
+    // Генерація та збереження Push-токена в базу
     function requestNotificationPermission(uid) {
       Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
+          // ⚠️ ЗМІНИ РЯДОК НИЖЧЕ: Встави свій Key pair з Firebase Консолі
           messaging.getToken({ vapidKey: 'BFpbUwteA45x4fgpStXe6KU9uZXTKG_mdX5h-7NmO6mgDkEiMUED4iaktuz-RNrd2s5s_qL__r8UT-Wn01xd0T0' }).then((currentToken) => {
             if (currentToken) {
               database.ref('chats/' + uid + '/fcmToken').set(currentToken);
@@ -311,7 +335,7 @@
         
         requestNotificationPermission(user.uid);
 
-        // Відстеження присутності (Online / Last Seen)
+        // Фіксація часу входу та виходу з мережі
         const userStatusRef = database.ref('chats/' + user.uid + '/status');
         database.ref('.info/connected').on('value', (snap) => {
           if (snap.val() === true) {
@@ -387,7 +411,7 @@
         }, 1500);
       };
 
-      // Відображення стану адміна (Друкує / Онлайн / Last Seen)
+      // Статус адміна
       database.ref('chats/' + uid + '/adminTyping').on('value', snapshot => {
         if (snapshot.val() === true) {
           typingStatus.textContent = 'друкує...';
@@ -398,8 +422,7 @@
             if (st && st.online) {
               typingStatus.textContent = 'онлайн';
             } else if (st && st.lastSeen) {
-              const date = new Date(st.lastSeen);
-              typingStatus.textContent = 'був(ла) ' + date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+              typingStatus.textContent = formatExactLastSeen(st.lastSeen);
             } else {
               typingStatus.textContent = 'офлайн';
             }
@@ -424,9 +447,8 @@
         entries.forEach(([msgId, msg]) => {
           const isMe = msg.sender === 'user';
 
-          // Якщо повідомлення від адміна й воно ще не прочитане — ставимо read: true
-          if (!isMe && !msg.read) {
-            database.ref('chats/' + uid + '/messages/' + msgId).update({ read: true });
+          if (!isMe && msg.read === false) {
+            database.ref('chats/' + uid + '/messages/' + msgId + '/read').set(true);
           }
 
           const msgDiv = document.createElement('div');
@@ -434,7 +456,7 @@
           
           let ticksHtml = '';
           if (isMe) {
-            ticksHtml = msg.read 
+            ticksHtml = (msg.read === true) 
               ? '<span class="ticks" style="color: #64b5f6;">✓✓</span>' 
               : '<span class="ticks" style="color: #7f91a4;">✓</span>';
           }
@@ -460,7 +482,7 @@
         database.ref('chats/' + uid + '/messages').push({
           sender: 'user',
           text: text,
-          timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }),
+          timestamp: getExactTime(),
           read: false
         });
 
