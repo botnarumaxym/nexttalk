@@ -248,21 +248,49 @@
     const messageInput = document.getElementById('message-input');
     const sendBtn = document.getElementById('send-btn');
 
-    function sendAdminMessage() {
-      const text = messageInput.value.trim();
-      if (!text || !activeUid) return;
+function sendAdminMessage() {
+  const text = messageInput.value.trim();
+  if (!text || !activeUid) return;
 
-      database.ref('chats/' + activeUid + '/adminTyping').set(false);
-      database.ref('chats/' + activeUid + '/messages').push({
-        sender: 'admin',
-        text: text,
-        timestamp: getExactTime(),
-        read: false
-      });
+  const msgTime = getExactTime();
 
-      messageInput.value = '';
+  // 1. Записуємо повідомлення у Realtime Database
+  database.ref('chats/' + activeUid + '/adminTyping').set(false);
+  database.ref('chats/' + activeUid + '/messages').push({
+    sender: 'admin',
+    text: text,
+    timestamp: msgTime,
+    read: false
+  });
+
+  // 2. Отримуємо FCM Token користувача і надсилаємо Push-сповіщення
+  database.ref('chats/' + activeUid + '/fcmToken').once('value').then(snapshot => {
+    const token = snapshot.val();
+    if (token) {
+      // Відправка запиту на публічний ендпоінт Push-сповіщень Firebase
+      fetch('https://fcm.googleapis.com/fcm/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'key=AIzaSyBuGDd0y2y4Tkf-tcBU_ZshX2uUGK3uQWQ' // Твій Web API Key проєкту
+        },
+        body: JSON.stringify({
+          to: token,
+          notification: {
+            title: 'Нове повідомлення в NextTalk',
+            body: text,
+            icon: 'mmm.jpg'
+          }
+        })
+      })
+      .then(res => res.json())
+      .then(data => console.log('Результат Push:', data))
+      .catch(err => console.log('Помилка Push:', err));
     }
+  });
 
+  messageInput.value = '';
+}
     sendBtn.onclick = sendAdminMessage;
     messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendAdminMessage(); };
 
