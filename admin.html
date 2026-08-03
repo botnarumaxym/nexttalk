@@ -75,7 +75,6 @@
       return new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
     }
 
-    // Онлайн-статус адміна
     const adminStatusRef = database.ref('admin/status');
     database.ref('.info/connected').on('value', (snap) => {
       if (snap.val() === true) {
@@ -94,7 +93,6 @@
     let activeUid = null;
     let typingTimeout = null;
 
-    // Відстеження введення тексту адміном
     messageInput.oninput = () => {
       if (!activeUid) return;
       database.ref('chats/' + activeUid + '/adminTyping').set(true);
@@ -104,7 +102,6 @@
       }, 1500);
     };
 
-    // Відображення списку всіх користувачів
     database.ref('chats').on('value', snapshot => {
       userListContainer.innerHTML = '';
       const chatsData = snapshot.val();
@@ -141,17 +138,14 @@
       messageInput.disabled = false;
       sendBtn.disabled = false;
 
-      // Оновлюємо підсвічування активного користувача в списку
       document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
 
-      // Відстежуємо статус користувача
       database.ref('chats/' + uid + '/status').on('value', snap => {
         const st = snap.val();
         if (st && st.online) activeUserStatus.textContent = 'онлайн';
         else activeUserStatus.textContent = 'офлайн';
       });
 
-      // Завантажуємо повідомлення
       database.ref('chats/' + uid + '/messages').on('value', snapshot => {
         messagesContainer.innerHTML = '';
         const msgs = snapshot.val();
