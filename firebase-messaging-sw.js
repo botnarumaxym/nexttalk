@@ -13,12 +13,12 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Обробка сповіщення у фоновому режимі (коли додаток закритий)
+// Обробка сповіщень у фоновому режимі
 messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification.title || 'Нове повідомлення';
+  const notificationTitle = payload.notification.title;
   const notificationOptions = {
-    body: payload.notification.body || 'Вам надіслали нове повідомлення',
-    icon: 'mmm.jpg'
+    body: payload.notification.body,
+    icon: payload.notification.icon || 'mmm.jpg'
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
