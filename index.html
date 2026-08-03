@@ -7,7 +7,7 @@
   
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#181818">
+  <meta name="theme-color" content="#0f172a">
   <link rel="icon" type="image/png" href="app-icon.png">
   <link rel="manifest" href="manifest.json">
 
@@ -21,8 +21,8 @@
     }
 
     body {
-      background-color: #0f172a;
-      color: #ffffff;
+      background-color: #0b1120;
+      color: #f8fafc;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -35,7 +35,7 @@
       width: 100%;
       max-width: 450px;
       height: 100vh;
-      background: #181818;
+      background: #0f172a;
       flex-direction: column;
       position: relative;
       overflow-y: auto;
@@ -59,7 +59,7 @@
       padding: 12px;
       border-radius: 8px;
       border: 1px solid #334155;
-      background: #0f172a;
+      background: #1e293b;
       color: white;
       outline: none;
     }
@@ -73,32 +73,48 @@
       font-weight: bold;
       cursor: pointer;
     }
+    .btn:hover { background: #0369a1; }
     .btn-secondary { background: transparent; color: #94a3b8; margin-top: 5px; }
     .error-msg { color: #f87171; font-size: 0.9rem; text-align: center; }
 
     /* --- 2. Шапка та Чати --- */
     .chat-header {
       padding: 15px;
-      background: #181818;
+      background: #0f172a;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #282828;
+      border-bottom: 1px solid #1e293b;
     }
-    .chat-title { font-weight: bold; font-size: 1.2rem; color: #ffffff; }
+    .chat-title { font-weight: bold; font-size: 1.2rem; color: #38bdf8; }
     .status-text { font-size: 0.8rem; color: #94a3b8; transition: color 0.2s; }
     .status-text.online { color: #22c55e; }
     .status-text.typing { color: #38bdf8; font-style: italic; }
 
+    /* Клікабельний заголовок чату */
+    .chat-header-user {
+      text-align: center;
+      cursor: pointer;
+      padding: 4px 12px;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+    }
+    .chat-header-user:hover {
+      background-color: #1e293b;
+    }
+
     .chat-item {
-      background: #242424;
+      background: #1e293b;
       padding: 15px;
       border-radius: 12px;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border: 1px solid #334155;
+      transition: background 0.15s;
     }
+    .chat-item:hover { background: #334155; }
 
     .messages-box {
       flex: 1;
@@ -107,6 +123,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      background: #0f172a;
     }
     .msg {
       max-width: 75%;
@@ -117,16 +134,17 @@
       word-break: break-word;
     }
     .msg.user { align-self: flex-end; background: #0284c7; color: white; border-bottom-right-radius: 2px; }
-    .msg.admin { align-self: flex-start; background: #282828; color: white; border-bottom-left-radius: 2px; }
+    .msg.admin { align-self: flex-start; background: #1e293b; color: white; border-bottom-left-radius: 2px; border: 1px solid #334155; }
     .msg-meta { font-size: 0.7rem; opacity: 0.7; text-align: right; margin-top: 4px; display: flex; justify-content: flex-end; gap: 4px; }
 
-    .chat-input-area { padding: 15px; background: #181818; display: flex; gap: 10px; border-top: 1px solid #282828; }
+    .chat-input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; border-top: 1px solid #1e293b; }
     .chat-input-area input { flex: 1; }
     .chat-input-area button { width: auto; padding: 0 20px; }
 
-    /* --- 3. Налаштування (Signal Style) --- */
+    /* --- 3. Налаштування --- */
     #settings-screen {
       padding: 20px;
+      background: #0f172a;
     }
     .settings-header {
       display: flex;
@@ -135,26 +153,27 @@
       margin-bottom: 20px;
     }
     .settings-title { font-size: 1.4rem; font-weight: 700; color: #ffffff; }
-    .action-btn { background: none; border: none; color: #0a84ff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .action-btn { background: none; border: none; color: #38bdf8; font-size: 1rem; font-weight: 600; cursor: pointer; }
 
     .profile-card {
       display: flex;
       align-items: center;
-      background-color: #242424;
+      background-color: #1e293b;
       padding: 14px 16px;
       border-radius: 14px;
       margin-bottom: 22px;
       cursor: pointer;
+      border: 1px solid #334155;
       transition: background-color 0.15s ease;
     }
-    .profile-card:hover { background-color: #2c2c2e; }
+    .profile-card:hover { background-color: #334155; }
 
     .profile-avatar-small {
       width: 52px;
       height: 52px;
       border-radius: 50%;
       margin-right: 14px;
-      background-color: #3a3a3c;
+      background-color: #0284c7;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -168,7 +187,7 @@
 
     .profile-info { display: flex; flex-direction: column; overflow: hidden; }
     .profile-name { font-weight: 600; font-size: 1.05rem; color: #ffffff; }
-    .profile-phone { font-size: 0.85rem; color: #8e8e93; margin-top: 2px; }
+    .profile-phone { font-size: 0.85rem; color: #94a3b8; margin-top: 2px; }
 
     .settings-list { display: flex; flex-direction: column; gap: 2px; }
     .settings-item {
@@ -177,15 +196,17 @@
       padding: 12px 14px;
       border-radius: 12px;
       cursor: pointer;
-      color: #f2f2f7;
+      color: #f8fafc;
       font-size: 0.95rem;
+      transition: background-color 0.15s ease;
     }
-    .settings-item:hover { background-color: #242424; }
-    .settings-icon { width: 22px; height: 22px; margin-right: 16px; color: #8e8e93; flex-shrink: 0; }
+    .settings-item:hover { background-color: #1e293b; }
+    .settings-icon { width: 22px; height: 22px; margin-right: 16px; color: #38bdf8; flex-shrink: 0; }
 
     /* --- 4. Екран «Профіль» --- */
     #profile-screen {
       padding: 20px;
+      background: #0f172a;
     }
     .profile-screen-header {
       display: flex;
@@ -219,7 +240,7 @@
       width: 90px;
       height: 90px;
       border-radius: 50%;
-      background-color: #3a3a3c;
+      background-color: #0284c7;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -232,16 +253,16 @@
     .profile-avatar-large img { width: 100%; height: 100%; object-fit: cover; }
 
     .change-photo-btn {
-      background: #2a2a2a;
-      color: #ffffff;
-      border: none;
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid #334155;
       padding: 8px 16px;
       border-radius: 18px;
       font-size: 0.88rem;
       font-weight: 500;
       cursor: pointer;
     }
-    .change-photo-btn:hover { background: #333333; }
+    .change-photo-btn:hover { background: #334155; }
 
     .profile-fields {
       display: flex;
@@ -259,7 +280,7 @@
     .field-icon {
       width: 22px;
       height: 22px;
-      color: #a0a0a0;
+      color: #38bdf8;
       flex-shrink: 0;
     }
     .field-value {
@@ -270,7 +291,7 @@
 
     .field-subtext {
       font-size: 0.82rem;
-      color: #8e8e93;
+      color: #94a3b8;
       line-height: 1.35;
       margin-left: 38px;
       margin-top: -6px;
@@ -278,7 +299,7 @@
 
     .divider {
       height: 1px;
-      background-color: #2a2a2a;
+      background-color: #1e293b;
       margin: 10px 0 10px 38px;
     }
   </style>
@@ -322,10 +343,13 @@
   <div id="chat-screen" class="screen">
     <div class="chat-header">
       <button id="back-btn" style="background:none; border:none; color:white; cursor:pointer; font-size:1.1rem;">← Назад</button>
-      <div style="text-align: center;">
+      
+      <!-- НА ТИСК НА "МАКСИМ" ВЕДЕ В ПРОФІЛЬ 👇 -->
+      <div id="chat-header-user" class="chat-header-user" onclick="showProfileFromChat()">
         <div style="font-weight: bold;">Максим</div>
         <div id="typing-status" class="status-text">завантаження...</div>
       </div>
+      
       <div style="width: 30px;"></div>
     </div>
 
@@ -345,10 +369,10 @@
     </div>
 
     <div class="profile-card" onclick="showProfileScreen()">
-      <div id="user-avatar-small" class="profile-avatar-small">М</div>
+      <div id="user-avatar-small" class="profile-avatar-small">К</div>
       <div class="profile-info">
-        <span id="user-display-name-settings" class="profile-name">Максим Ботнару</span>
-        <span id="user-display-phone-settings" class="profile-phone">068 224 1029</span>
+        <span id="user-display-name-settings" class="profile-name">Користувач</span>
+        <span id="user-display-phone-settings" class="profile-phone">Не вказано</span>
       </div>
     </div>
 
@@ -362,32 +386,12 @@
         <span>Вигляд</span>
       </div>
       <div class="settings-item" onclick="alert('Розділ у розробці')">
-        <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <span>Чати</span>
-      </div>
-      <div class="settings-item" onclick="alert('Розділ у розробці')">
-        <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-        <span>Виклики</span>
-      </div>
-      <div class="settings-item" onclick="alert('Розділ у розробці')">
         <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         <span>Сповіщення</span>
       </div>
       <div class="settings-item" onclick="alert('Розділ у розробці')">
         <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         <span>Конфіденційність</span>
-      </div>
-      <div class="settings-item" onclick="alert('Розділ у розробці')">
-        <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10h-10V2z"></path></svg>
-        <span>Використання даних</span>
-      </div>
-      <div class="settings-item" onclick="alert('Розділ у розробці')">
-        <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        <span>Резервні копії</span>
-      </div>
-      <div class="settings-item" onclick="alert('Розділ у розробці')">
-        <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-        <span>Підтримати NextTalk</span>
       </div>
     </div>
   </div>
@@ -400,7 +404,7 @@
     </div>
 
     <div class="avatar-section">
-      <div id="user-avatar-large" class="profile-avatar-large">М</div>
+      <div id="user-avatar-large" class="profile-avatar-large">К</div>
       <button class="change-photo-btn" onclick="changeAvatarUrl()">Змінити фото</button>
     </div>
 
@@ -408,14 +412,14 @@
       <div>
         <div class="field-row" onclick="editName()">
           <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          <span id="profile-name-val" class="field-value">Максим Ботнару</span>
+          <span id="profile-name-val" class="field-value">Користувач</span>
         </div>
       </div>
 
       <div>
         <div class="field-row" onclick="editAbout()">
           <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-          <span id="profile-about-val" class="field-value">Casual☠️</span>
+          <span id="profile-about-val" class="field-value">Привіт! Я використовую NextTalk.</span>
         </div>
         <p class="field-subtext">Ваш профіль і зміни в ньому бачать ваші співрозмовники, контакти й групи.</p>
       </div>
@@ -453,6 +457,7 @@
     const database = firebase.database();
 
     let currentUser = null;
+    let previousScreen = 'chats-screen'; // Запам'ятовуємо, звідки прийшли
 
     function formatExactLastSeen(timestamp) {
       if (!timestamp) return 'офлайн';
@@ -472,14 +477,28 @@
     document.getElementById('open-settings-btn').onclick = () => { chatsScreen.classList.remove('active'); settingsScreen.classList.add('active'); };
     document.getElementById('close-settings-btn').onclick = () => { settingsScreen.classList.remove('active'); chatsScreen.classList.add('active'); };
 
+    // Відкрити профіль з Налаштувань
     function showProfileScreen() {
+      previousScreen = 'settings-screen';
       settingsScreen.classList.remove('active');
       profileScreen.classList.add('active');
     }
 
+    // Перехід у Профіль прямо з ЧАТУ! 👇
+    function showProfileFromChat() {
+      previousScreen = 'chat-screen';
+      chatScreen.classList.remove('active');
+      profileScreen.classList.add('active');
+    }
+
+    // Повернення назад з Профілю
     function hideProfileScreen() {
       profileScreen.classList.remove('active');
-      settingsScreen.classList.add('active');
+      if (previousScreen === 'chat-screen') {
+        chatScreen.classList.add('active');
+      } else {
+        settingsScreen.classList.add('active');
+      }
     }
 
     // Авторизація
@@ -525,8 +544,8 @@
           .then(userCredential => {
             database.ref('chats/' + userCredential.user.uid + '/profile').set({
               name: name,
-              phone: '068 224 1029',
-              about: 'Casual☠️',
+              phone: 'Не вказано',
+              about: 'Привіт! Я використовую NextTalk.',
               username: ''
             });
           })
@@ -543,7 +562,7 @@
         authScreen.classList.remove('active');
         chatsScreen.classList.add('active');
 
-        // Відстеження власного статусу онлайн
+        // Відстеження статусу онлайн
         const userStatusRef = database.ref('chats/' + user.uid + '/status');
         database.ref('.info/connected').on('value', (snap) => {
           if (snap.val() === true) {
@@ -555,9 +574,9 @@
         // Завантаження профілю
         database.ref('chats/' + user.uid + '/profile').on('value', snapshot => {
           const profile = snapshot.val() || {};
-          const name = profile.name || "Максим Ботнару";
-          const phone = profile.phone || "068 224 1029";
-          const about = profile.about || "Casual☠️";
+          const name = profile.name || "Користувач";
+          const phone = profile.phone || "Не вказано";
+          const about = profile.about || "Привіт! Я використовую NextTalk.";
           const username = profile.username || "Ім'я користувача";
 
           document.getElementById('user-display-name-settings').textContent = name;
@@ -625,7 +644,7 @@
       }
     }
 
-    // Логіка чату та статусу Максима (Адміна)
+    // Логіка чату
     function initChatLogic(uid) {
       const messagesContainer = document.getElementById('messages-container');
       const messageInput = document.getElementById('message-input');
@@ -636,7 +655,6 @@
 
       let typingTimeout = null;
 
-      // Відстеження введення тексту користувачем
       messageInput.oninput = () => {
         database.ref('chats/' + uid + '/userTyping').set(true);
         clearTimeout(typingTimeout);
@@ -645,7 +663,6 @@
         }, 1500);
       };
 
-      // Слухач онлайн-статусу Максима (Адміна) та "друкує..."
       database.ref('chats/' + uid + '/adminTyping').on('value', snapshot => {
         if (snapshot.val() === true) {
           typingStatus.textContent = 'друкує...';
@@ -667,7 +684,6 @@
         }
       });
 
-      // Завантаження повідомлень
       database.ref('chats/' + uid + '/messages').on('value', snapshot => {
         messagesContainer.innerHTML = '';
         const data = snapshot.val();
