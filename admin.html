@@ -13,8 +13,12 @@
     .user-list { flex: 1; overflow-y: auto; }
     .user-item { padding: 15px 20px; border-bottom: 1px solid #334155; cursor: pointer; transition: 0.2s; }
     .user-item:hover, .user-item.active { background: #334155; }
+    .user-header-row { display: flex; justify-content: space-between; align-items: center; }
     .user-name { font-weight: bold; }
-    .user-sub { font-size: 0.8rem; color: #94a3b8; margin-top: 3px; display: flex; justify-content: space-between; }
+    .user-sub { font-size: 0.8rem; color: #94a3b8; margin-top: 5px; display: flex; justify-content: space-between; }
+
+    /* Зелена крапка онлайн */
+    .online-badge { display: inline-block; width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%; margin-left: 6px; }
 
     .main-chat { flex: 1; display: flex; flex-direction: column; background: #0f172a; }
     .chat-header { padding: 15px 20px; background: #1e293b; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
@@ -42,7 +46,7 @@
     <div class="chat-header">
       <div>
         <div id="active-user-name" style="font-weight: bold;">Оберіть чат</div>
-        <div id="active-user-status" style="font-size: 0.8rem; color: #94a3b8;"></div>
+        <div id="active-user-status" style="font-size: 0.8rem; color: #38bdf8; margin-top: 2px;"></div>
       </div>
     </div>
 
@@ -75,6 +79,13 @@
       return new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
     }
 
+    function formatLastSeen(timestamp) {
+      if (!timestamp) return 'офлайн';
+      const date = new Date(timestamp);
+      return 'був(ла) о ' + date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Онлайн-статус самого Адміна
     const adminStatusRef = database.ref('admin/status');
     database.ref('.info/connected').on('value', (snap) => {
       if (snap.val() === true) {
@@ -92,6 +103,7 @@
 
     let activeUid = null;
     let typingTimeout = null;
+    let statusListenerRef = null;
 
     messageInput.oninput = () => {
       if (!activeUid) return;
@@ -102,6 +114,7 @@
       }, 1500);
     };
 
+    // Слухач списку чатів
     database.ref('chats').on('value', snapshot => {
       userListContainer.innerHTML = '';
       const chatsData = snapshot.val();
@@ -110,6 +123,7 @@
       Object.entries(chatsData).forEach(([uid, data]) => {
         const profile = data.profile || {};
         const name = profile.name || 'Користувач';
+        const isOnline = data.status && data.status.online === true;
         
         let lastMsgText = 'Немає повідомлень';
         if (data.messages) {
@@ -120,7 +134,10 @@
         const userDiv = document.createElement('div');
         userDiv.className = 'user-item' + (uid === activeUid ? ' active' : '');
         userDiv.innerHTML = `
-          <div class="user-name">${name}</div>
+          <div class="user-header-row">
+            <span class="user-name">${name}</span>
+            ${isOnline ? '<span class="online-badge" title="В мережі"></span>' : ''}
+          </div>
           <div class="user-sub">
             <span>${lastMsgText}</span>
             <span>${data.userTyping ? '<i style="color:#38bdf8;">друкує...</i>' : ''}</span>
@@ -140,12 +157,26 @@
 
       document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
 
-      database.ref('chats/' + uid + '/status').on('value', snap => {
+      // Видаляємо попередній слухач статусу, якщо він був
+      if (statusListenerRef) statusListenerRef.off();
+
+      // Відстеження точного статусу обраного користувача в реальному часі
+      statusListenerRef = database.ref('chats/' + uid + '/status');
+      statusListenerRef.on('value', snap => {
         const st = snap.val();
-        if (st && st.online) activeUserStatus.textContent = 'онлайн';
-        else activeUserStatus.textContent = 'офлайн';
+        if (st && st.online === true) {
+          activeUserStatus.textContent = 'онлайн';
+          activeUserStatus.style.color = '#22c55e'; // Зелений колір для онлайн
+        } else if (st && st.lastSeen) {
+          activeUserStatus.textContent = formatLastSeen(st.lastSeen);
+          activeUserStatus.style.color = '#94a3b8'; // Сірий колір
+        } else {
+          activeUserStatus.textContent = 'офлайн';
+          activeUserStatus.style.color = '#94a3b8';
+        }
       });
 
+      // Завантажуємо повідомлення
       database.ref('chats/' + uid + '/messages').on('value', snapshot => {
         messagesContainer.innerHTML = '';
         const msgs = snapshot.val();
