@@ -4,71 +4,82 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NextTalk Manager</title>
-  <link rel="manifest" href="admin-manifest.json">
-  <meta name="theme-color" content="#0f172a">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; height: 100vh; display: flex; overflow: hidden; }
-
-    /* Ліва панель */
-    .sidebar { width: 320px; background: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; }
-    .sidebar-header { padding: 18px 20px; background: #0f172a; border-bottom: 1px solid #334155; font-size: 1.1rem; font-weight: bold; color: #38bdf8; }
-    .user-list { flex: 1; overflow-y: auto; }
-    .user-card { padding: 14px 16px; border-bottom: 1px solid #334155; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 12px; }
-    .user-card:hover, .user-card.active { background: #334155; }
-    .avatar { width: 42px; height: 42px; border-radius: 50%; background: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+    body { background-color: #0e1621; color: #f5f5f5; height: 100vh; display: flex; }
+    
+    .admin-container { display: flex; width: 100%; height: 100vh; background: #17212b; }
+    
+    /* Ліва панель списку чатів */
+    .sidebar { width: 320px; background: #17212b; border-right: 1px solid #0e1621; display: flex; flex-direction: column; }
+    .sidebar-header { padding: 16px; font-weight: 700; font-size: 1.1rem; border-bottom: 1px solid #0e1621; color: #64b5f6; }
+    .users-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+    .user-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #0e1621; transition: background 0.2s; }
+    .user-item:hover, .user-item.active { background: #202b36; }
+    .avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #64b5f6, #2196f3); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; background-size: cover; background-position: center; }
     .user-info { flex: 1; overflow: hidden; }
-    .user-id { font-weight: 600; font-size: 0.95rem; color: #f8fafc; margin-bottom: 3px; }
-    .user-preview { font-size: 0.8rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-name { font-size: 0.95rem; font-weight: 600; color: #fff; }
+    .user-status { font-size: 0.75rem; color: #7f91a4; }
 
-    /* Права панель */
-    .chat-area { flex: 1; display: flex; flex-direction: column; background: #0f172a; }
-    .chat-header { padding: 14px 20px; background: #1e293b; border-bottom: 1px solid #334155; font-weight: 600; font-size: 1rem; color: #f8fafc; display: flex; align-items: center; justify-content: space-between; }
-    #admin-typing-status { font-size: 0.85rem; color: #38bdf8; font-style: italic; }
+    /* Права панель чату */
+    .chat-area { flex: 1; display: flex; flex-direction: column; background: #0e1621; }
+    .chat-header { padding: 12px 16px; background: #17212b; border-bottom: 1px solid #0e1621; display: flex; align-items: center; gap: 12px; }
+    .header-info { display: flex; flex-direction: column; }
+    .chat-title { font-size: 1rem; font-weight: 600; color: #fff; }
+    .chat-status { font-size: 0.8rem; color: #7f91a4; }
+    
+    .messages-container { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background-color: #0e1621; background-image: radial-gradient(#17212b 1px, transparent 0); background-size: 16px 16px; }
+    .msg { max-width: 70%; padding: 8px 12px; border-radius: 14px; font-size: 0.93rem; line-height: 1.35; word-wrap: break-word; position: relative; }
+    .msg.admin { align-self: flex-end; background: #2b5278; color: #ffffff; border-bottom-right-radius: 4px; }
+    .msg.user { align-self: flex-start; background: #182533; color: #f5f5f5; border-bottom-left-radius: 4px; }
 
-    #messages-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .placeholder { margin: auto; color: #64748b; font-size: 1rem; text-align: center; }
+    .msg-meta { display: flex; align-items: center; justify-content: flex-end; gap: 3px; float: right; margin-left: 10px; margin-top: 4px; height: 14px; }
+    .msg-time { font-size: 0.68rem; color: #7f91a4; }
+    .msg.admin .msg-time { color: #86a8c8; }
+    .ticks { font-size: 0.8rem; font-weight: bold; line-height: 1; margin-left: 2px; }
 
-    .msg { max-width: 70%; padding: 10px 14px; border-radius: 12px; font-size: 0.93rem; line-height: 1.4; word-wrap: break-word; }
-    .msg.user { align-self: flex-start; background: #1e293b; color: #f8fafc; border: 1px solid #334155; border-bottom-left-radius: 2px; }
-    .msg.admin { align-self: flex-end; background: #0284c7; color: #ffffff; border-bottom-right-radius: 2px; }
-    .msg-time { font-size: 0.68rem; opacity: 0.75; text-align: right; margin-top: 4px; }
+    .input-container { padding: 12px; background: #17212b; border-top: 1px solid #0e1621; display: flex; gap: 8px; }
+    #message-input { flex: 1; padding: 10px 16px; background: #242f3d; border: 1px solid transparent; border-radius: 22px; color: #ffffff; outline: none; font-size: 0.95rem; }
+    #message-input:focus { border-color: #64b5f6; }
+    #send-btn { background: #5288c1; color: white; border: none; padding: 0 20px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+    #send-btn:hover { background: #64b5f6; }
 
-    .input-area { padding: 14px 20px; background: #1e293b; border-top: 1px solid #334155; display: flex; gap: 10px; }
-    #admin-input { flex: 1; padding: 12px 16px; background: #0f172a; border: 1px solid #334155; border-radius: 24px; color: white; outline: none; }
-    #admin-input:focus { border-color: #38bdf8; }
-    #send-btn { background: #0284c7; color: white; border: none; padding: 0 20px; border-radius: 24px; font-weight: bold; cursor: pointer; }
-    #send-btn:disabled { background: #334155; cursor: not-allowed; }
-
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    .no-chat-selected { flex: 1; display: flex; justify-content: center; align-items: center; color: #7f91a4; }
   </style>
 </head>
 <body>
 
-  <div class="sidebar">
-    <div class="sidebar-header">NextTalk Manager</div>
-    <div class="user-list" id="user-list">
-      <div class="placeholder">Завантаження чатів...</div>
+  <div class="admin-container">
+    <div class="sidebar">
+      <div class="sidebar-header">NextTalk Manager</div>
+      <div class="users-list" id="users-list"></div>
     </div>
-  </div>
 
-  <div class="chat-area">
-    <div class="chat-header">
-      <span id="active-user-header">Оберіть чат зі списку ліворуч</span>
-      <span id="admin-typing-status"></span>
-    </div>
-    <div id="messages-area">
-      <div class="placeholder">Діалог не обрано</div>
-    </div>
-    <div class="input-area">
-      <input type="text" id="admin-input" placeholder="Напишіть відповідь..." disabled autocomplete="off">
-      <button id="send-btn" disabled>Надіслати</button>
+    <div class="chat-area" id="chat-area">
+      <div class="no-chat-selected" id="no-chat-text">Оберіть чат зі списку ліворуч</div>
+      
+      <div id="active-chat-content" style="display: none; height: 100%; flex-direction: column;">
+        <div class="chat-header">
+          <div class="avatar" id="header-avatar">?</div>
+          <div class="header-info">
+            <div class="chat-title" id="header-name">Користувач</div>
+            <div class="chat-status" id="header-status">офлайн</div>
+          </div>
+        </div>
+
+        <div class="messages-container" id="messages-container"></div>
+
+        <div class="input-container">
+          <input type="text" id="message-input" placeholder="Написати відповідь..." autocomplete="off">
+          <button id="send-btn">Надіслати</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -83,136 +94,187 @@
 
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+    let activeUid = null;
 
-    const userList = document.getElementById('user-list');
-    const messagesArea = document.getElementById('messages-area');
-    const activeUserHeader = document.getElementById('active-user-header');
-    const adminTypingStatus = document.getElementById('admin-typing-status');
-    const adminInput = document.getElementById('admin-input');
-    const sendBtn = document.getElementById('send-btn');
-
-    let activeUserId = null;
-    let adminTypingTimeout = null;
-
-    // Відслідковування вводу адміна
-    adminInput.addEventListener('input', () => {
-      if (!activeUserId) return;
-      database.ref('chats/' + activeUserId + '/adminTyping').set(true);
-      clearTimeout(adminTypingTimeout);
-      adminTypingTimeout = setTimeout(() => {
-        database.ref('chats/' + activeUserId + '/adminTyping').set(false);
-      }, 1500);
+    // Автоматична фіксація статусу адміна (Онлайн / Останній візит)
+    const adminStatusRef = database.ref('admin/status');
+    database.ref('.info/connected').on('value', (snap) => {
+      if (snap.val() === true) {
+        adminStatusRef.onDisconnect().set({
+          online: false,
+          lastSeen: firebase.database.ServerValue.TIMESTAMP
+        });
+        adminStatusRef.set({
+          online: true,
+          lastSeen: firebase.database.ServerValue.TIMESTAMP
+        });
+      }
     });
 
-    // Список усіх чатів
+    // Точний час з секундами
+    function getExactTime() {
+      const now = new Date();
+      return now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    // Форматування часу виходу з мережі
+    function formatExactLastSeen(timestamp) {
+      if (!timestamp) return 'офлайн';
+      const date = new Date(timestamp);
+      const now = new Date();
+      const isToday = date.toDateString() === now.toDateString();
+      const timeStr = date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+
+      return isToday ? 'був(ла) сьогодні о ' + timeStr : 'був(ла) ' + date.toLocaleDateString('uk-UA') + ' о ' + timeStr;
+    }
+
+    // Завантаження списку всіх користувачів
+    const usersList = document.getElementById('users-list');
     database.ref('chats').on('value', snapshot => {
-      userList.innerHTML = '';
+      usersList.innerHTML = '';
       const chats = snapshot.val();
+      if (!chats) return;
 
-      if (!chats) {
-        userList.innerHTML = '<div class="placeholder">Активних чатів немає</div>';
-        return;
-      }
+      Object.keys(chats).forEach(uid => {
+        const chat = chats[uid];
+        const profile = chat.profile || { name: 'Користувач', avatar: 'К' };
+        
+        const userDiv = document.createElement('div');
+        userDiv.className = 'user-item ' + (uid === activeUid ? 'active' : '');
+        
+        const av = (profile.avatar || 'К').trim();
+        const isUrl = av.startsWith('http://') || av.startsWith('https://') || av.includes('.');
+        const avatarStyle = isUrl ? `background-image: url('${av}')` : '';
+        const avatarContent = isUrl ? '' : av.charAt(0).toUpperCase();
 
-      Object.keys(chats).forEach(uId => {
-  const chatData = chats[uId];
-  const messages = chatData.messages ? Object.values(chatData.messages) : [];
-  const lastMsg = messages.length > 0 ? messages[messages.length - 1].text : 'Немає повідомлень';
-  
-  // Беремо дані профілю, якщо вони є в Firebase
-  const profile = chatData.profile || {};
-  const userName = profile.name || `Клієнт (${uId.substr(0, 6)})`;
-  const avatarValue = profile.avatar || uId.substr(5, 2);
+        userDiv.innerHTML = `
+          <div class="avatar" style="${avatarStyle}">${avatarContent}</div>
+          <div class="user-info">
+            <div class="user-name">${profile.name}</div>
+            <div class="user-status" id="user-status-item-${uid}">...</div>
+          </div>
+        `;
 
-  const card = document.createElement('div');
-  card.className = 'user-card' + (uId === activeUserId ? ' active' : '');
-  card.onclick = () => selectUser(uId);
+        userDiv.onclick = () => selectUserChat(uid, profile);
+        usersList.appendChild(userDiv);
 
-  // Перевірка на посилання для аватарки
-  const isUrl = avatarValue.startsWith('http://') || avatarValue.startsWith('https://') || avatarValue.includes('.');
-  const avatarStyle = isUrl ? `style="background-image: url('${avatarValue}'); background-size: cover; color: transparent;"` : '';
-  const avatarText = isUrl ? '' : avatarValue.charAt(0).toUpperCase();
-
-  card.innerHTML = `
-    <div class="avatar" ${avatarStyle}>${avatarText}</div>
-    <div class="user-info">
-      <div class="user-id">${userName}</div>
-      <div class="user-preview">${lastMsg}</div>
-    </div>
-  `;
-  userList.appendChild(card);
-});
-
-      if (activeUserId && chats[activeUserId] && chats[activeUserId].messages) {
-        renderMessages(chats[activeUserId].messages);
-      }
+        database.ref('chats/' + uid + '/status').on('value', stSnap => {
+          const st = stSnap.val();
+          const elem = document.getElementById(`user-status-item-${uid}`);
+          if (elem) {
+            if (st && st.online) {
+              elem.textContent = 'онлайн';
+              elem.style.color = '#64b5f6';
+            } else {
+              elem.textContent = 'офлайн';
+              elem.style.color = '#7f91a4';
+            }
+          }
+        });
+      });
     });
 
-    // Вибір чату
-    function selectUser(uId) {
-      if (activeUserId) {
-        database.ref('chats/' + activeUserId + '/userTyping').off();
+    // Відкриття чату та автоматична зміна галочок на сині ✓✓
+    function selectUserChat(uid, profile) {
+      activeUid = uid;
+      document.getElementById('no-chat-text').style.display = 'none';
+      document.getElementById('active-chat-content').style.display = 'flex';
+      
+      const headerName = document.getElementById('header-name');
+      const headerAvatar = document.getElementById('header-avatar');
+      const headerStatus = document.getElementById('header-status');
+
+      headerName.textContent = profile.name;
+      const av = (profile.avatar || 'К').trim();
+      if (av.includes('.')) {
+        headerAvatar.style.backgroundImage = `url('${av}')`;
+        headerAvatar.textContent = '';
+      } else {
+        headerAvatar.style.backgroundImage = 'none';
+        headerAvatar.textContent = av.charAt(0).toUpperCase();
       }
 
-      activeUserId = uId;
-      activeUserHeader.textContent = 'Чат з: ' + uId;
-      adminInput.disabled = false;
-      sendBtn.disabled = false;
-
-      // Слухаємо, чи друкує обраний клієнт
-      database.ref('chats/' + uId + '/userTyping').on('value', snapshot => {
-        if (snapshot.val() === true) {
-          adminTypingStatus.textContent = 'клієнт друкує...';
+      database.ref('chats/' + uid + '/status').on('value', stSnap => {
+        const st = stSnap.val();
+        if (st && st.online) {
+          headerStatus.textContent = 'онлайн';
+          headerStatus.style.color = '#64b5f6';
+        } else if (st && st.lastSeen) {
+          headerStatus.textContent = formatExactLastSeen(st.lastSeen);
+          headerStatus.style.color = '#7f91a4';
         } else {
-          adminTypingStatus.textContent = '';
+          headerStatus.textContent = 'офлайн';
         }
       });
 
-      database.ref('chats/' + activeUserId + '/messages').once('value', snapshot => {
-        renderMessages(snapshot.val() || {});
+      const messagesContainer = document.getElementById('messages-container');
+      database.ref('chats/' + uid + '/messages').on('value', snapshot => {
+        messagesContainer.innerHTML = '';
+        const data = snapshot.val();
+        if (!data) return;
+
+        Object.entries(data).forEach(([msgId, msg]) => {
+          const isAdmin = msg.sender === 'admin';
+
+          // КОЛИ АДМІН ВІДКРИВАЄ ЧАТ — УСІ ПОВІДОМЛЕННЯ КОРИСТУВАЧА СТАЮТЬ ПРОЧИТАНИМИ (read = true)
+          if (!isAdmin && msg.read !== true) {
+            database.ref('chats/' + uid + '/messages/' + msgId + '/read').set(true);
+          }
+
+          const msgDiv = document.createElement('div');
+          msgDiv.className = 'msg ' + (isAdmin ? 'admin' : 'user');
+
+          let ticksHtml = '';
+          if (isAdmin) {
+            ticksHtml = (msg.read === true) 
+              ? '<span class="ticks" style="color: #64b5f6;">✓✓</span>' 
+              : '<span class="ticks" style="color: #7f91a4;">✓</span>';
+          }
+
+          msgDiv.innerHTML = `
+            <span>${msg.text}</span>
+            <div class="msg-meta">
+              <span class="msg-time">${msg.timestamp || ''}</span>
+              ${ticksHtml}
+            </div>
+          `;
+          messagesContainer.appendChild(msgDiv);
+        });
+
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
       });
     }
 
-    function renderMessages(messagesObj) {
-      messagesArea.innerHTML = '';
-      const msgsArray = Object.values(messagesObj);
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
 
-      if (msgsArray.length === 0) {
-        messagesArea.innerHTML = '<div class="placeholder">Повідомлень немає</div>';
-        return;
-      }
-
-      msgsArray.forEach(msg => {
-        const div = document.createElement('div');
-        const isAdmin = msg.sender === 'admin';
-        div.className = 'msg ' + (isAdmin ? 'admin' : 'user');
-        div.innerHTML = `
-          <div>${msg.text}</div>
-          <div class="msg-time">${msg.timestamp || ''}</div>
-        `;
-        messagesArea.appendChild(div);
-      });
-
-      messagesArea.scrollTop = messagesArea.scrollHeight;
-    }
-
-    // Відправка повідомлення від адміна
     function sendAdminMessage() {
-      const text = adminInput.value.trim();
-      if (!text || !activeUserId) return;
+      const text = messageInput.value.trim();
+      if (!text || !activeUid) return;
 
-      database.ref('chats/' + activeUserId + '/adminTyping').set(false);
-      database.ref('chats/' + activeUserId + '/messages').push({
+      database.ref('chats/' + activeUid + '/adminTyping').set(false);
+      database.ref('chats/' + activeUid + '/messages').push({
         sender: 'admin',
         text: text,
-        timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+        timestamp: getExactTime(),
+        read: false
       });
 
-      adminInput.value = '';
+      messageInput.value = '';
     }
 
     sendBtn.onclick = sendAdminMessage;
-    adminInput.onkeypress = (e) => { if (e.key === 'Enter') sendAdminMessage(); };
+    messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendAdminMessage(); };
+
+    let typingTimeout = null;
+    messageInput.oninput = () => {
+      if (!activeUid) return;
+      database.ref('chats/' + activeUid + '/adminTyping').set(true);
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        database.ref('chats/' + activeUid + '/adminTyping').set(false);
+      }, 1500);
+    };
   </script>
 </body>
 </html>
