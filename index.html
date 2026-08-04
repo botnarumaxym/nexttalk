@@ -12,184 +12,58 @@
   <link rel="manifest" href="manifest.json">
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: #0b1120;
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    /* Контейнери екранів */
-    .screen {
-      display: none;
-      width: 100%;
-      max-width: 450px;
-      height: 100vh;
-      background: #0f172a;
-      flex-direction: column;
-      position: relative;
-      overflow-y: auto;
-    }
-    .screen.active {
-      display: flex;
-    }
-
-    /* --- 1. Авторизація --- */
-    .auth-container {
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      height: 100%;
-      gap: 1rem;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: #0b1120; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: #0f172a; flex-direction: column; position: relative; overflow-y: auto; }
+    .screen.active { display: flex; }
+    .auth-container { padding: 2rem; display: flex; flex-direction: column; justify-content: center; height: 100%; gap: 1rem; }
     .auth-container h2 { text-align: center; color: #38bdf8; }
-    .input-field {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #334155;
-      background: #1e293b;
-      color: white;
-      outline: none;
-    }
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      background: #0284c7;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
+    .input-field { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; outline: none; }
+    .btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #0284c7; color: white; font-weight: bold; cursor: pointer; }
     .btn:hover { background: #0369a1; }
     .btn-secondary { background: transparent; color: #94a3b8; margin-top: 5px; }
     .error-msg { color: #f87171; font-size: 0.9rem; text-align: center; }
-
-    /* --- 2. Шапка та Чати --- */
-    .chat-header {
-      padding: 15px;
-      background: #0f172a;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #1e293b;
-    }
+    .chat-header { padding: 15px; background: #0f172a; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; }
     .chat-title { font-weight: bold; font-size: 1.2rem; color: #38bdf8; }
     .status-text { font-size: 0.8rem; color: #94a3b8; transition: color 0.2s; }
     .status-text.online { color: #22c55e; }
     .status-text.typing { color: #38bdf8; font-style: italic; }
-
-    .chat-header-user {
-      text-align: center;
-      cursor: pointer;
-      padding: 4px 12px;
-      border-radius: 8px;
-      transition: background-color 0.2s ease;
-    }
+    .chat-header-user { text-align: center; cursor: pointer; padding: 4px 12px; border-radius: 8px; transition: background-color 0.2s ease; }
     .chat-header-user:hover { background-color: #1e293b; }
-
-    .chat-item {
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 12px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border: 1px solid #334155;
-      transition: background 0.15s;
-    }
+    .chat-item { background: #1e293b; padding: 15px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; transition: background 0.15s; }
     .chat-item:hover { background: #334155; }
-
-    .messages-box {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: #0f172a;
-    }
-    .msg {
-      max-width: 75%;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      line-height: 1.4;
-      word-break: break-word;
-    }
+    .messages-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0f172a; }
+    .msg { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
     .msg.user { align-self: flex-end; background: #0284c7; color: white; border-bottom-right-radius: 2px; }
     .msg.admin { align-self: flex-start; background: #1e293b; color: white; border-bottom-left-radius: 2px; border: 1px solid #334155; }
     .msg-meta { font-size: 0.7rem; opacity: 0.7; text-align: right; margin-top: 4px; display: flex; justify-content: flex-end; gap: 4px; }
-
     .chat-input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; border-top: 1px solid #1e293b; }
     .chat-input-area input { flex: 1; }
     .chat-input-area button { width: auto; padding: 0 20px; }
-
-    /* --- 3. Налаштування --- */
     #settings-screen { padding: 20px; background: #0f172a; }
     .settings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .settings-title { font-size: 1.4rem; font-weight: 700; color: #ffffff; }
     .action-btn { background: none; border: none; color: #38bdf8; font-size: 1rem; font-weight: 600; cursor: pointer; }
-
-    .profile-card {
-      display: flex; align-items: center; background-color: #1e293b;
-      padding: 14px 16px; border-radius: 14px; margin-bottom: 22px; cursor: pointer;
-      border: 1px solid #334155; transition: background-color 0.15s ease;
-    }
+    .profile-card { display: flex; align-items: center; background-color: #1e293b; padding: 14px 16px; border-radius: 14px; margin-bottom: 22px; cursor: pointer; border: 1px solid #334155; transition: background-color 0.15s ease; }
     .profile-card:hover { background-color: #334155; }
-
-    .profile-avatar-small {
-      width: 52px; height: 52px; border-radius: 50%; margin-right: 14px;
-      background-color: #0284c7; display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; font-weight: bold; color: #ffffff; flex-shrink: 0; overflow: hidden;
-    }
+    .profile-avatar-small { width: 52px; height: 52px; border-radius: 50%; margin-right: 14px; background-color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; color: #ffffff; flex-shrink: 0; overflow: hidden; }
     .profile-avatar-small img { width: 100%; height: 100%; object-fit: cover; }
-
     .profile-info { display: flex; flex-direction: column; overflow: hidden; }
     .profile-name { font-weight: 600; font-size: 1.05rem; color: #ffffff; }
     .profile-phone { font-size: 0.85rem; color: #94a3b8; margin-top: 2px; }
-
     .settings-list { display: flex; flex-direction: column; gap: 2px; }
-    .settings-item {
-      display: flex; align-items: center; padding: 12px 14px; border-radius: 12px;
-      cursor: pointer; color: #f8fafc; font-size: 0.95rem; transition: background-color 0.15s ease;
-    }
+    .settings-item { display: flex; align-items: center; padding: 12px 14px; border-radius: 12px; cursor: pointer; color: #f8fafc; font-size: 0.95rem; transition: background-color 0.15s ease; }
     .settings-item:hover { background-color: #1e293b; }
     .settings-icon { width: 22px; height: 22px; margin-right: 16px; color: #38bdf8; flex-shrink: 0; }
-
-    /* --- 4. Екран «Профіль» --- */
     #profile-screen { padding: 20px; background: #0f172a; }
     .profile-screen-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px; }
     .profile-screen-header .back-btn { position: absolute; left: 0; background: none; border: none; color: #ffffff; font-size: 1.2rem; cursor: pointer; }
     .profile-screen-title { font-size: 1.1rem; font-weight: 600; color: #ffffff; }
-
     .avatar-section { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
-    .profile-avatar-large {
-      width: 90px; height: 90px; border-radius: 50%; background-color: #0284c7;
-      display: flex; align-items: center; justify-content: center; font-size: 2rem;
-      font-weight: bold; color: #ffffff; overflow: hidden; margin-bottom: 12px;
-    }
+    .profile-avatar-large { width: 90px; height: 90px; border-radius: 50%; background-color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; color: #ffffff; overflow: hidden; margin-bottom: 12px; }
     .profile-avatar-large img { width: 100%; height: 100%; object-fit: cover; }
-
-    .change-photo-btn {
-      background: #1e293b; color: #38bdf8; border: 1px solid #334155; padding: 8px 16px;
-      border-radius: 18px; font-size: 0.88rem; font-weight: 500; cursor: pointer;
-    }
+    .change-photo-btn { background: #1e293b; color: #38bdf8; border: 1px solid #334155; padding: 8px 16px; border-radius: 18px; font-size: 0.88rem; font-weight: 500; cursor: pointer; }
     .change-photo-btn:hover { background: #334155; }
-
     .profile-fields { display: flex; flex-direction: column; gap: 18px; }
     .field-row { display: flex; align-items: center; gap: 16px; padding: 4px 0; cursor: pointer; }
     .field-icon { width: 22px; height: 22px; color: #38bdf8; flex-shrink: 0; }
@@ -200,7 +74,6 @@
 </head>
 <body>
 
-  <!-- 1. Екран авторизації -->
   <div id="auth-screen" class="screen active">
     <div class="auth-container">
       <h2 id="auth-desc">Увійдіть у свій акаунт</h2>
@@ -213,7 +86,6 @@
     </div>
   </div>
 
-  <!-- 2. Список чатів -->
   <div id="chats-screen" class="screen">
     <div class="chat-header">
       <span class="chat-title">NextTalk</span>
@@ -233,7 +105,6 @@
     </div>
   </div>
 
-  <!-- 3. Екран чату -->
   <div id="chat-screen" class="screen">
     <div class="chat-header">
       <button id="back-btn" style="background:none; border:none; color:white; cursor:pointer; font-size:1.1rem;">← Назад</button>
@@ -243,16 +114,13 @@
       </div>
       <div style="width: 30px;"></div>
     </div>
-
     <div id="messages-container" class="messages-box"></div>
-
     <div class="chat-input-area">
       <input type="text" id="message-input" class="input-field" placeholder="Напишіть повідомлення...">
       <button id="send-btn" class="btn">➤</button>
     </div>
   </div>
 
-  <!-- 4. Екран налаштувань -->
   <div id="settings-screen" class="screen">
     <div class="settings-header">
       <div class="settings-title">Налаштування</div>
@@ -274,18 +142,9 @@
         <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20z" fill="currentColor"></path></svg>
         <span>Вигляд</span>
       </div>
-      <div class="settings-item" onclick="alert('Розділ у розробці')">
-        <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-        <span>Сповіщення</span>
-      </div>
-      <div class="settings-item" onclick="alert('Розділ у розробці')">
-        <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        <span>Конфіденційність</span>
-      </div>
     </div>
   </div>
 
-  <!-- 5. Екран «Профіль» -->
   <div id="profile-screen" class="screen">
     <div class="profile-screen-header">
       <button class="back-btn" onclick="hideProfileScreen()">←</button>
@@ -307,7 +166,7 @@
           <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
           <span id="profile-about-val" class="field-value">Привіт! Я використовую NextTalk.</span>
         </div>
-        <p class="field-subtext">Ваш профіль і зміни в ньому бачать ваші співрозмовники, контакти й групи.</p>
+        <p class="field-subtext">Ваш профіль і зміни в ньому бачать ваші співрозмовники.</p>
       </div>
       <div class="divider"></div>
       <div>
@@ -320,7 +179,6 @@
     </div>
   </div>
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -339,17 +197,30 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const database = firebase.database();
-
     let currentUser = null;
     let previousScreen = 'chats-screen';
 
+    // РАЗУМНА ФУНКЦІЯ ЧАСУ
     function formatExactLastSeen(timestamp) {
       if (!timestamp) return 'офлайн';
       const date = new Date(timestamp);
-      return 'був(ла) о ' + date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+      const now = new Date();
+
+      const isToday = date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const isYesterday = date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear();
+
+      const timeString = date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+
+      if (isToday) return 'був(ла) сьогодні о ' + timeString;
+      else if (isYesterday) return 'був(ла) вчора о ' + timeString;
+      else {
+        const dateString = date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return 'був(ла) ' + dateString + ' о ' + timeString;
+      }
     }
 
-    // Навігація між екранами
     const chatsScreen = document.getElementById('chats-screen');
     const chatScreen = document.getElementById('chat-screen');
     const settingsScreen = document.getElementById('settings-screen');
@@ -361,28 +232,14 @@
     document.getElementById('open-settings-btn').onclick = () => { chatsScreen.classList.remove('active'); settingsScreen.classList.add('active'); };
     document.getElementById('close-settings-btn').onclick = () => { settingsScreen.classList.remove('active'); chatsScreen.classList.add('active'); };
 
-    function showProfileScreen() {
-      previousScreen = 'settings-screen';
-      settingsScreen.classList.remove('active');
-      profileScreen.classList.add('active');
-    }
-
-    function showProfileFromChat() {
-      previousScreen = 'chat-screen';
-      chatScreen.classList.remove('active');
-      profileScreen.classList.add('active');
-    }
-
+    function showProfileScreen() { previousScreen = 'settings-screen'; settingsScreen.classList.remove('active'); profileScreen.classList.add('active'); }
+    function showProfileFromChat() { previousScreen = 'chat-screen'; chatScreen.classList.remove('active'); profileScreen.classList.add('active'); }
     function hideProfileScreen() {
       profileScreen.classList.remove('active');
-      if (previousScreen === 'chat-screen') {
-        chatScreen.classList.add('active');
-      } else {
-        settingsScreen.classList.add('active');
-      }
+      if (previousScreen === 'chat-screen') chatScreen.classList.add('active');
+      else settingsScreen.classList.add('active');
     }
 
-    // Авторизація
     const authTitle = document.getElementById('auth-desc');
     const authName = document.getElementById('auth-name');
     const authEmail = document.getElementById('auth-email');
@@ -390,147 +247,75 @@
     const authSubmitBtn = document.getElementById('auth-submit-btn');
     const authToggleBtn = document.getElementById('auth-toggle-btn');
     const authError = document.getElementById('auth-error');
-
     let isSignUpMode = false;
 
     authToggleBtn.onclick = () => {
       isSignUpMode = !isSignUpMode;
       authError.textContent = '';
-      if (isSignUpMode) {
-        authTitle.textContent = 'Створіть свій акаунт';
-        authName.style.display = 'block';
-        authSubmitBtn.textContent = 'Зареєструватися';
-        authToggleBtn.textContent = 'Вже є акаунт? Увійти';
-      } else {
-        authTitle.textContent = 'Увійдіть у свій акаунт';
-        authName.style.display = 'none';
-        authSubmitBtn.textContent = 'Увійти';
-        authToggleBtn.textContent = 'Немає акаунту? Зареєструватися';
-      }
+      if (isSignUpMode) { authTitle.textContent = 'Створіть свій акаунт'; authName.style.display = 'block'; authSubmitBtn.textContent = 'Зареєструватися'; authToggleBtn.textContent = 'Вже є акаунт? Увійти'; } 
+      else { authTitle.textContent = 'Увійдіть у свій акаунт'; authName.style.display = 'none'; authSubmitBtn.textContent = 'Увійти'; authToggleBtn.textContent = 'Немає акаунту? Зареєструватися'; }
     };
 
     authSubmitBtn.onclick = () => {
       const email = authEmail.value.trim();
       const password = authPassword.value.trim();
       const name = authName.value.trim();
-
-      if (!email || !password) {
-        authError.textContent = 'Заповніть всі поля';
-        return;
-      }
-
+      if (!email || !password) { authError.textContent = 'Заповніть всі поля'; return; }
       if (isSignUpMode) {
         if (!name) { authError.textContent = "Введіть ім'я"; return; }
-        auth.createUserWithEmailAndPassword(email, password)
-          .then(userCredential => {
-            database.ref('chats/' + userCredential.user.uid + '/profile').set({
-              name: name,
-              phone: 'Не вказано',
-              about: 'Привіт! Я використовую NextTalk.',
-              username: ''
-            });
-          })
-          .catch(err => authError.textContent = err.message);
-      } else {
-        auth.signInWithEmailAndPassword(email, password)
-          .catch(err => authError.textContent = 'Невірний email або пароль');
-      }
+        auth.createUserWithEmailAndPassword(email, password).then(userCredential => {
+            database.ref('chats/' + userCredential.user.uid + '/profile').set({ name: name, phone: 'Не вказано', about: 'Привіт! Я використовую NextTalk.', username: '' });
+          }).catch(err => authError.textContent = err.message);
+      } else auth.signInWithEmailAndPassword(email, password).catch(err => authError.textContent = 'Невірний email або пароль');
     };
 
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
-        authScreen.classList.remove('active');
-        chatsScreen.classList.add('active');
-
-        // Відстеження статусу онлайн
+        authScreen.classList.remove('active'); chatsScreen.classList.add('active');
         const userStatusRef = database.ref('chats/' + user.uid + '/status');
-        database.ref('.info/connected').on('value', (snap) => {
+        database.ref('.info/connected').on('value', snap => {
           if (snap.val() === true) {
             userStatusRef.onDisconnect().set({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
             userStatusRef.set({ online: true, lastSeen: firebase.database.ServerValue.TIMESTAMP });
           }
         });
 
-        // Завантаження профілю
         database.ref('chats/' + user.uid + '/profile').on('value', snapshot => {
           const profile = snapshot.val() || {};
           const name = profile.name || "Користувач";
-          const phone = profile.phone || "Не вказано";
-          const about = profile.about || "Привіт! Я використовую NextTalk.";
-          const username = profile.username || "Ім'я користувача";
-
           document.getElementById('user-display-name-settings').textContent = name;
-          document.getElementById('user-display-phone-settings').textContent = phone;
+          document.getElementById('user-display-phone-settings').textContent = profile.phone || "Не вказано";
           document.getElementById('profile-name-val').textContent = name;
-          document.getElementById('profile-about-val').textContent = about;
-          document.getElementById('profile-username-val').textContent = username;
-
+          document.getElementById('profile-about-val').textContent = profile.about || "Привіт! Я використовую NextTalk.";
+          document.getElementById('profile-username-val').textContent = profile.username || "Ім'я користувача";
+          
           const smallAvatar = document.getElementById('user-avatar-small');
           const largeAvatar = document.getElementById('user-avatar-large');
-
           if (profile.avatarUrl) {
             smallAvatar.innerHTML = `<img src="${profile.avatarUrl}">`;
             largeAvatar.innerHTML = `<img src="${profile.avatarUrl}">`;
           } else {
             const initial = name.charAt(0).toUpperCase();
-            smallAvatar.innerHTML = initial;
-            largeAvatar.innerHTML = initial;
+            smallAvatar.innerHTML = initial; largeAvatar.innerHTML = initial;
           }
         });
-
         initChatLogic(user.uid);
       } else {
         currentUser = null;
-        authScreen.classList.add('active');
-        chatsScreen.classList.remove('active');
-        chatScreen.classList.remove('active');
-        settingsScreen.classList.remove('active');
-        profileScreen.classList.remove('active');
+        authScreen.classList.add('active'); chatsScreen.classList.remove('active'); chatScreen.classList.remove('active'); settingsScreen.classList.remove('active'); profileScreen.classList.remove('active');
       }
     });
 
     document.getElementById('logout-btn').onclick = () => auth.signOut();
 
-    function editName() {
-      const current = document.getElementById('profile-name-val').textContent;
-      const newName = prompt("Введіть ім'я:", current);
-      if (newName && currentUser) {
-        database.ref('chats/' + currentUser.uid + '/profile').update({ name: newName });
-      }
-    }
+    function editName() { const current = document.getElementById('profile-name-val').textContent; const newName = prompt("Введіть ім'я:", current); if (newName && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ name: newName }); }
+    function editAbout() { const current = document.getElementById('profile-about-val').textContent; const newAbout = prompt("Введіть статус / інформацію:", current); if (newAbout !== null && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ about: newAbout }); }
+    function editUsername() { const current = document.getElementById('profile-username-val').textContent; const newUsername = prompt("Введіть ім'я користувача (@username):", current); if (newUsername !== null && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ username: newUsername }); }
+    function changeAvatarUrl() { const url = prompt("Введіть посилання (URL) на нове фото:"); if (url !== null && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ avatarUrl: url }); }
 
-    function editAbout() {
-      const current = document.getElementById('profile-about-val').textContent;
-      const newAbout = prompt("Введіть статус / інформацію:", current);
-      if (newAbout !== null && currentUser) {
-        database.ref('chats/' + currentUser.uid + '/profile').update({ about: newAbout });
-      }
-    }
+    function escapeHTML(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
-    function editUsername() {
-      const current = document.getElementById('profile-username-val').textContent;
-      const newUsername = prompt("Введіть ім'я користувача (@username):", current);
-      if (newUsername !== null && currentUser) {
-        database.ref('chats/' + currentUser.uid + '/profile').update({ username: newUsername });
-      }
-    }
-
-    function changeAvatarUrl() {
-      const url = prompt("Введіть посилання (URL) на нове фото:");
-      if (url !== null && currentUser) {
-        database.ref('chats/' + currentUser.uid + '/profile').update({ avatarUrl: url });
-      }
-    }
-
-    // Функція для захисту від шкідливого коду (XSS)
-    function escapeHTML(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    // Логіка чату
     function initChatLogic(uid) {
       const messagesContainer = document.getElementById('messages-container');
       const messageInput = document.getElementById('message-input');
@@ -538,34 +323,22 @@
       const typingStatus = document.getElementById('typing-status');
       const listPreview = document.getElementById('list-preview');
       const listTime = document.getElementById('list-time');
-
       let typingTimeout = null;
 
       messageInput.oninput = () => {
         database.ref('chats/' + uid + '/userTyping').set(true);
         clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => {
-          database.ref('chats/' + uid + '/userTyping').set(false);
-        }, 1500);
+        typingTimeout = setTimeout(() => database.ref('chats/' + uid + '/userTyping').set(false), 1500);
       };
 
       database.ref('chats/' + uid + '/adminTyping').on('value', snapshot => {
-        if (snapshot.val() === true) {
-          typingStatus.textContent = 'друкує...';
-          typingStatus.className = 'status-text typing';
-        } else {
+        if (snapshot.val() === true) { typingStatus.textContent = 'друкує...'; typingStatus.className = 'status-text typing'; } 
+        else {
           database.ref('admin/status').on('value', statusSnap => {
             const st = statusSnap.val();
-            if (st && st.online) {
-              typingStatus.textContent = 'онлайн';
-              typingStatus.className = 'status-text online';
-            } else if (st && st.lastSeen) {
-              typingStatus.textContent = formatExactLastSeen(st.lastSeen);
-              typingStatus.className = 'status-text';
-            } else {
-              typingStatus.textContent = 'офлайн';
-              typingStatus.className = 'status-text';
-            }
+            if (st && st.online) { typingStatus.textContent = 'онлайн'; typingStatus.className = 'status-text online'; } 
+            else if (st && st.lastSeen) { typingStatus.textContent = formatExactLastSeen(st.lastSeen); typingStatus.className = 'status-text'; } 
+            else { typingStatus.textContent = 'офлайн'; typingStatus.className = 'status-text'; }
           });
         }
       });
@@ -574,42 +347,30 @@
         messagesContainer.innerHTML = '';
         const data = snapshot.val();
         if (!data) return;
-
         const entries = Object.entries(data);
         if (entries.length > 0) {
           const last = entries[entries.length - 1][1];
           listPreview.textContent = last.text;
           listTime.textContent = last.timestamp || '';
         }
-
         entries.forEach(([msgId, msg]) => {
           const isMe = msg.sender === 'user';
           const msgDiv = document.createElement('div');
           msgDiv.className = 'msg ' + (isMe ? 'user' : 'admin');
-          
-          // ТЕПЕР ТУТ БЕЗПЕЧНЕ ВИВЕДЕННЯ ТЕКСТУ
           const safeText = escapeHTML(msg.text);
           msgDiv.innerHTML = `<span>${safeText}</span><div class="msg-meta"><span>${msg.timestamp || ''}</span></div>`;
-          
           messagesContainer.appendChild(msgDiv);
         });
-
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
       });
 
       function sendMessage() {
         const text = messageInput.value.trim();
         if (!text) return;
-
         database.ref('chats/' + uid + '/userTyping').set(false);
-        database.ref('chats/' + uid + '/messages').push({
-          sender: 'user',
-          text: text,
-          timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
-        });
+        database.ref('chats/' + uid + '/messages').push({ sender: 'user', text: text, timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) });
         messageInput.value = '';
       }
-
       sendBtn.onclick = sendMessage;
       messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
     }
