@@ -2,7 +2,6 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NextTalk</title>
   
@@ -13,10 +12,9 @@
   <link rel="manifest" href="manifest.json">
 
   <style>
-    /* --- ЗМІННІ КОЛЬОРІВ --- */
     :root {
-      --primary: #0284c7;       /* Головний колір (кнопки, повідомлення) */
-      --primary-light: #38bdf8; /* Світлий акцент (іконки, заголовки) */
+      --primary: #0284c7;       
+      --primary-light: #38bdf8; 
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -88,8 +86,7 @@
     .field-subtext { font-size: 0.82rem; color: #94a3b8; line-height: 1.35; margin-left: 38px; margin-top: -6px; }
     .divider { height: 1px; background-color: #1e293b; margin: 10px 0 10px 38px; }
 
-    /* --- СТИЛІ ЕКРАНУ ВИГЛЯД --- */
-    .color-swatches { display: flex; gap: 15px; margin-top: 15px; }
+    .color-swatches { display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
     .color-swatch { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid #334155; transition: transform 0.2s; }
     .color-swatch:hover { transform: scale(1.1); }
   </style>
@@ -143,7 +140,6 @@
     </div>
   </div>
 
-  <!-- Екран Налаштувань -->
   <div id="settings-screen" class="screen">
     <div class="settings-header">
       <div class="settings-title">Налаштування</div>
@@ -161,7 +157,6 @@
         <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         <span>Загальні</span>
       </div>
-      <!-- Кнопка відкриття екрану Вигляд -->
       <div class="settings-item" onclick="showAppearanceScreen()">
         <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20z" fill="currentColor"></path></svg>
         <span>Вигляд</span>
@@ -169,7 +164,6 @@
     </div>
   </div>
 
-  <!-- Новий екран "Вигляд" -->
   <div id="appearance-screen" class="screen">
     <div class="screen-header">
       <button class="back-btn" onclick="hideAppearanceScreen()">←</button>
@@ -180,12 +174,14 @@
       <p style="font-size: 0.85rem; color: #94a3b8;">Оберіть головний колір для вашого додатка.</p>
       
       <div class="color-swatches">
-        <!-- Синій (Стандартний) -->
+        <!-- Синій -->
         <div class="color-swatch" style="background: #0284c7;" onclick="setTheme('#0284c7', '#38bdf8')"></div>
         <!-- Зелений -->
         <div class="color-swatch" style="background: #16a34a;" onclick="setTheme('#16a34a', '#4ade80')"></div>
         <!-- Фіолетовий -->
         <div class="color-swatch" style="background: #9333ea;" onclick="setTheme('#9333ea', '#c084fc')"></div>
+        <!-- Рожевий (ДОДАНО) -->
+        <div class="color-swatch" style="background: #db2777;" onclick="setTheme('#db2777', '#f472b6')"></div>
         <!-- Помаранчевий -->
         <div class="color-swatch" style="background: #ea580c;" onclick="setTheme('#ea580c', '#fb923c')"></div>
         <!-- Червоний -->
@@ -194,7 +190,6 @@
     </div>
   </div>
 
-  <!-- Екран Профіль -->
   <div id="profile-screen" class="screen">
     <div class="screen-header">
       <button class="back-btn" onclick="hideProfileScreen()">←</button>
@@ -234,7 +229,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-    // --- ЛОГІКА ТЕМИ КОЛЬОРІВ ---
     function setTheme(primary, light) {
       document.documentElement.style.setProperty('--primary', primary);
       document.documentElement.style.setProperty('--primary-light', light);
@@ -242,7 +236,6 @@
       localStorage.setItem('themeLight', light);
     }
 
-    // Завантажуємо збережену тему при старті
     const savedPrimary = localStorage.getItem('themePrimary');
     const savedLight = localStorage.getItem('themeLight');
     if (savedPrimary && savedLight) {
@@ -299,7 +292,6 @@
       else settingsScreen.classList.add('active');
     }
 
-    // Навігація екрану Вигляд
     function showAppearanceScreen() { settingsScreen.classList.remove('active'); appearanceScreen.classList.add('active'); }
     function hideAppearanceScreen() { appearanceScreen.classList.remove('active'); settingsScreen.classList.add('active'); }
 
