@@ -122,7 +122,7 @@
       <button onclick="hideSearchScreen()" class="action-btn">Назад</button>
     </div>
     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-      <input type="text" id="search-username-input" class="input-field" placeholder="Введіть @username">
+      <input type="text" id="search-username-input" class="input-field" placeholder="Введіть ім'я або @username">
       <button onclick="searchUser()" class="btn" style="width: auto; padding: 0 20px;">Знайти</button>
     </div>
     <div id="search-result-container"></div>
@@ -370,38 +370,45 @@
 
     function escapeHTML(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
+    // Покращений пошук (шукає за @username або за ім'ям)
     function searchUser() {
-      const query = document.getElementById('search-username-input').value.trim().replace('@', '');
+      const query = document.getElementById('search-username-input').value.trim().toLowerCase().replace('@', '');
       const container = document.getElementById('search-result-container');
       container.innerHTML = 'Шукаю...';
 
-      if (!query) { container.innerHTML = 'Введіть ім\'я для пошуку'; return; }
+      if (!query) { container.innerHTML = 'Введіть текст для пошуку'; return; }
 
       database.ref('chats').once('value').then(snapshot => {
-        let foundUser = null;
+        let foundUsers = [];
         snapshot.forEach(child => {
           const userData = child.val();
-          if (userData.profile && userData.profile.username) {
-            if (userData.profile.username.toLowerCase().replace('@', '') === query.toLowerCase()) {
+          if (userData.profile) {
+            const uName = (userData.profile.username || '').toLowerCase().replace('@', '');
+            const realName = (userData.profile.name || '').toLowerCase();
+            
+            if ((uName && uName.includes(query)) || realName.includes(query)) {
               if (child.key !== currentUser.uid) {
-                foundUser = { uid: child.key, ...userData.profile };
+                foundUsers.push({ uid: child.key, ...userData.profile });
               }
             }
           }
         });
 
-        if (foundUser) {
-          container.innerHTML = `
-            <div class="chat-item" onclick="openDirectChat('${foundUser.uid}', '${escapeHTML(foundUser.name)}')">
-              <div>
-                <div style="font-weight: bold;">${escapeHTML(foundUser.name)}</div>
-                <div style="font-size: 0.85rem; color: var(--primary-light);">@${escapeHTML(foundUser.username || '')}</div>
+        if (foundUsers.length > 0) {
+          container.innerHTML = '';
+          foundUsers.forEach(user => {
+            container.innerHTML += `
+              <div class="chat-item" onclick="openDirectChat('${user.uid}', '${escapeHTML(user.name)}')">
+                <div>
+                  <div style="font-weight: bold;">${escapeHTML(user.name)}</div>
+                  <div style="font-size: 0.85rem; color: var(--primary-light);">@${escapeHTML(user.username || 'не вказано')}</div>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--primary-light);">Написати ➔</div>
               </div>
-              <div style="font-size: 0.85rem; color: var(--primary-light);">Написати ➔</div>
-            </div>
-          `;
+            `;
+          });
         } else {
-          container.innerHTML = '<div style="color: #f87171;">Користувача не знайдено</div>';
+          container.innerHTML = '<div style="color: #f87171; text-align: center; margin-top: 15px;">Користувача не знайдено</div>';
         }
       });
     }
