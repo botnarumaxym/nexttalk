@@ -284,12 +284,55 @@
     document.getElementById('close-settings-btn').onclick = () => { settingsScreen.classList.remove('active'); chatsScreen.classList.add('active'); };
     document.getElementById('open-search-btn').onclick = () => { chatsScreen.classList.remove('active'); searchScreen.classList.add('active'); };
 
-    function showProfileScreen() { previousScreen = 'settings-screen'; settingsScreen.classList.remove('active'); profileScreen.classList.add('active'); }
-    function showProfileFromChat() { previousScreen = 'chat-screen'; chatScreen.classList.remove('active'); profileScreen.classList.add('active'); }
+    function showProfileFromChat() {
+      previousScreen = 'chat-screen';
+      chatScreen.classList.remove('active');
+      profileScreen.classList.add('active');
+      loadProfileData(currentChatUserId, false);
+    }
+
+    function showProfileScreen() {
+      previousScreen = 'settings-screen';
+      settingsScreen.classList.remove('active');
+      profileScreen.classList.add('active');
+      loadProfileData(currentUser.uid, true);
+    }
+
     function hideProfileScreen() {
       profileScreen.classList.remove('active');
       if (previousScreen === 'chat-screen') chatScreen.classList.add('active');
       else settingsScreen.classList.add('active');
+    }
+
+    function loadProfileData(targetUid, isEditable) {
+      database.ref('chats/' + targetUid + '/profile').once('value').then(snapshot => {
+        const profile = snapshot.val() || {};
+        const name = profile.name || "Користувач";
+        
+        document.getElementById('profile-name-val').textContent = name;
+        document.getElementById('profile-about-val').textContent = profile.about || "Привіт! Я використовую NextTalk.";
+        document.getElementById('profile-username-val').textContent = profile.username || "Ім'я користувача";
+        
+        const largeAvatar = document.getElementById('user-avatar-large');
+        if (profile.avatarUrl) {
+          largeAvatar.innerHTML = `<img src="${profile.avatarUrl}">`;
+        } else {
+          largeAvatar.innerHTML = name.charAt(0).toUpperCase();
+        }
+
+        const changePhotoBtn = document.querySelector('.change-photo-btn');
+        if (isEditable) {
+          if (changePhotoBtn) changePhotoBtn.style.display = 'block';
+          document.getElementById('profile-name-val').parentElement.onclick = editName;
+          document.getElementById('profile-about-val').parentElement.parentElement.onclick = editAbout;
+          document.getElementById('profile-username-val').parentElement.parentElement.onclick = editUsername;
+        } else {
+          if (changePhotoBtn) changePhotoBtn.style.display = 'none';
+          document.getElementById('profile-name-val').parentElement.onclick = null;
+          document.getElementById('profile-about-val').parentElement.parentElement.onclick = null;
+          document.getElementById('profile-username-val').parentElement.parentElement.onclick = null;
+        }
+      });
     }
 
     function showAppearanceScreen() { settingsScreen.classList.remove('active'); appearanceScreen.classList.add('active'); }
@@ -344,18 +387,12 @@
           const profile = snapshot.val() || {};
           const name = profile.name || "Користувач";
           document.getElementById('user-display-name-settings').textContent = name;
-          document.getElementById('profile-name-val').textContent = name;
-          document.getElementById('profile-about-val').textContent = profile.about || "Привіт! Я використовую NextTalk.";
-          document.getElementById('profile-username-val').textContent = profile.username || "Ім'я користувача";
           
           const smallAvatar = document.getElementById('user-avatar-small');
-          const largeAvatar = document.getElementById('user-avatar-large');
           if (profile.avatarUrl) {
             smallAvatar.innerHTML = `<img src="${profile.avatarUrl}">`;
-            largeAvatar.innerHTML = `<img src="${profile.avatarUrl}">`;
           } else {
-            const initial = name.charAt(0).toUpperCase();
-            smallAvatar.innerHTML = initial; largeAvatar.innerHTML = initial;
+            smallAvatar.innerHTML = name.charAt(0).toUpperCase();
           }
         });
         loadUserChats(user.uid);
@@ -497,7 +534,7 @@
                   <div style="font-weight: bold;">${escapeHTML(friendProfile.name)}</div>
                   <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 3px;">${escapeHTML(lastMsg)}</div>
                 </div>
-                <div style="font-size: 0.75rem; color: #64748b;"></div>
+                <div style="font-size: 0.75rem; color: #64748b;">🔗</div>
               `;
               item.onclick = () => openDirectChat(friendUid, friendProfile.name);
               container.appendChild(item);
