@@ -62,7 +62,6 @@
     .profile-avatar-small img { width: 100%; height: 100%; object-fit: cover; }
     .profile-info { display: flex; flex-direction: column; overflow: hidden; }
     .profile-name { font-weight: 600; font-size: 1.05rem; color: #ffffff; }
-    .profile-phone { font-size: 0.85rem; color: #94a3b8; margin-top: 2px; }
     
     .settings-list { display: flex; flex-direction: column; gap: 2px; }
     .settings-item { display: flex; align-items: center; padding: 12px 14px; border-radius: 12px; cursor: pointer; color: #f8fafc; font-size: 0.95rem; transition: background-color 0.15s ease; }
@@ -154,7 +153,6 @@
       <div id="user-avatar-small" class="profile-avatar-small">К</div>
       <div class="profile-info">
         <span id="user-display-name-settings" class="profile-name">Користувач</span>
-        <span id="user-display-phone-settings" class="profile-phone">Не вказано</span>
       </div>
     </div>
     <div class="settings-list">
@@ -321,7 +319,7 @@
       if (isSignUpMode) {
         if (!name) { authError.textContent = "Введіть ім'я"; return; }
         auth.createUserWithEmailAndPassword(email, password).then(userCredential => {
-            database.ref('chats/' + userCredential.user.uid + '/profile').set({ name: name, phone: 'Не вказано', about: 'Привіт! Я використовую NextTalk.', username: '' });
+            database.ref('chats/' + userCredential.user.uid + '/profile').set({ name: name, about: 'Привіт! Я використовую NextTalk.', username: '' });
           }).catch(err => authError.textContent = err.message);
       } else auth.signInWithEmailAndPassword(email, password).catch(err => authError.textContent = 'Невірний email або пароль');
     };
@@ -342,7 +340,6 @@
           const profile = snapshot.val() || {};
           const name = profile.name || "Користувач";
           document.getElementById('user-display-name-settings').textContent = name;
-          document.getElementById('user-display-phone-settings').textContent = profile.phone || "Не вказано";
           document.getElementById('profile-name-val').textContent = name;
           document.getElementById('profile-about-val').textContent = profile.about || "Привіт! Я використовую NextTalk.";
           document.getElementById('profile-username-val').textContent = profile.username || "Ім'я користувача";
