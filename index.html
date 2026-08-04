@@ -105,7 +105,6 @@
     </div>
   </div>
 
-  <!-- Екран чатів -->
   <div id="chats-screen" class="screen">
     <div class="chat-header">
       <span class="chat-title">NextTalk</span>
@@ -115,12 +114,9 @@
         <button id="logout-btn" style="background:none; border:none; color:#f87171; cursor:pointer; margin-left:10px;">Вийти</button>
       </div>
     </div>
-    <div style="padding: 15px;" id="chats-list-container">
-      <!-- Тут будуть з'являтися чати з друзями -->
-    </div>
+    <div style="padding: 15px;" id="chats-list-container"></div>
   </div>
 
-  <!-- Новий екран пошуку друзів -->
   <div id="search-screen" class="screen">
     <div class="settings-header">
       <div class="settings-title">Пошук друга</div>
@@ -260,7 +256,6 @@
     const database = firebase.database();
     let currentUser = null;
     let previousScreen = 'chats-screen';
-    let currentChatUserId = null;
     let currentListener = null;
 
     function formatExactLastSeen(timestamp) {
@@ -326,7 +321,7 @@
       if (isSignUpMode) {
         if (!name) { authError.textContent = "Введіть ім'я"; return; }
         auth.createUserWithEmailAndPassword(email, password).then(userCredential => {
-            database.ref('users/' + userCredential.user.uid).set({ name: name, username: '', phone: 'Не вказано', about: 'Привіт!' });
+            database.ref('chats/' + userCredential.user.uid + '/profile').set({ name: name, phone: 'Не вказано', about: 'Привіт! Я використовую NextTalk.', username: '' });
           }).catch(err => authError.textContent = err.message);
       } else auth.signInWithEmailAndPassword(email, password).catch(err => authError.textContent = 'Невірний email або пароль');
     };
@@ -335,7 +330,7 @@
       if (user) {
         currentUser = user;
         authScreen.classList.remove('active'); chatsScreen.classList.add('active');
-        const userStatusRef = database.ref('users/' + user.uid + '/status');
+        const userStatusRef = database.ref('chats/' + user.uid + '/status');
         database.ref('.info/connected').on('value', snap => {
           if (snap.val() === true) {
             userStatusRef.onDisconnect().set({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
@@ -343,7 +338,7 @@
           }
         });
 
-        database.ref('users/' + user.uid).on('value', snapshot => {
+        database.ref('chats/' + user.uid + '/profile').on('value', snapshot => {
           const profile = snapshot.val() || {};
           const name = profile.name || "Користувач";
           document.getElementById('user-display-name-settings').textContent = name;
@@ -371,14 +366,13 @@
 
     document.getElementById('logout-btn').onclick = () => auth.signOut();
 
-    function editName() { const current = document.getElementById('profile-name-val').textContent; const newName = prompt("Введіть ім'я:", current); if (newName && currentUser) database.ref('users/' + currentUser.uid).update({ name: newName }); }
-    function editAbout() { const current = document.getElementById('profile-about-val').textContent; const newAbout = prompt("Введіть статус / інформацію:", current); if (newAbout !== null && currentUser) database.ref('users/' + currentUser.uid).update({ about: newAbout }); }
-    function editUsername() { const current = document.getElementById('profile-username-val').textContent; const newUsername = prompt("Введіть ім'я користувача (@username):", current); if (newUsername !== null && currentUser) database.ref('users/' + currentUser.uid).update({ username: newUsername }); }
-    function changeAvatarUrl() { const url = prompt("Введіть посилання (URL) на нове фото:"); if (url !== null && currentUser) database.ref('users/' + currentUser.uid).update({ avatarUrl: url }); }
+    function editName() { const current = document.getElementById('profile-name-val').textContent; const newName = prompt("Введіть ім'я:", current); if (newName && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ name: newName }); }
+    function editAbout() { const current = document.getElementById('profile-about-val').textContent; const newAbout = prompt("Введіть статус / інформацію:", current); if (newAbout !== null && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ about: newAbout }); }
+    function editUsername() { const current = document.getElementById('profile-username-val').textContent; const newUsername = prompt("Введіть ім'я користувача (@username):", current); if (newUsername !== null && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ username: newUsername }); }
+    function changeAvatarUrl() { const url = prompt("Введіть посилання (URL) на нове фото:"); if (url !== null && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ avatarUrl: url }); }
 
     function escapeHTML(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
-    // Пошук користувача за @username
     function searchUser() {
       const query = document.getElementById('search-username-input').value.trim().replace('@', '');
       const container = document.getElementById('search-result-container');
@@ -386,13 +380,15 @@
 
       if (!query) { container.innerHTML = 'Введіть ім\'я для пошуку'; return; }
 
-      database.ref('users').once('value').then(snapshot => {
+      database.ref('chats').once('value').then(snapshot => {
         let foundUser = null;
         snapshot.forEach(child => {
           const userData = child.val();
-          if (userData.username && userData.username.toLowerCase().replace('@', '') === query.toLowerCase()) {
-            if (child.key !== currentUser.uid) {
-              foundUser = { uid: child.key, ...userData };
+          if (userData.profile && userData.profile.username) {
+            if (userData.profile.username.toLowerCase().replace('@', '') === query.toLowerCase()) {
+              if (child.key !== currentUser.uid) {
+                foundUser = { uid: child.key, ...userData.profile };
+              }
             }
           }
         });
@@ -402,7 +398,7 @@
             <div class="chat-item" onclick="openDirectChat('${foundUser.uid}', '${escapeHTML(foundUser.name)}')">
               <div>
                 <div style="font-weight: bold;">${escapeHTML(foundUser.name)}</div>
-                <div style="font-size: 0.85rem; color: #38bdf8;">@${escapeHTML(foundUser.username)}</div>
+                <div style="font-size: 0.85rem; color: var(--primary-light);">@${escapeHTML(foundUser.username || '')}</div>
               </div>
               <div style="font-size: 0.85rem; color: var(--primary-light);">Написати ➔</div>
             </div>
@@ -418,7 +414,6 @@
     }
 
     function openDirectChat(friendUid, friendName) {
-      currentChatUserId = friendUid;
       searchScreen.classList.remove('active');
       chatScreen.classList.add('active');
       document.getElementById('active-chat-name').textContent = friendName;
@@ -432,8 +427,7 @@
       if (currentListener) database.ref(currentListener).off();
       currentListener = 'direct_messages/' + chatId;
 
-      // Статус друга
-      database.ref('users/' + friendUid + '/status').on('value', snap => {
+      database.ref('chats/' + friendUid + '/status').on('value', snap => {
         const st = snap.val();
         if (st && st.online) {
           typingStatus.textContent = 'онлайн';
@@ -447,7 +441,6 @@
         }
       });
 
-      // Повідомлення
       database.ref(currentListener).on('value', snapshot => {
         messagesContainer.innerHTML = '';
         const data = snapshot.val();
@@ -490,7 +483,7 @@
         Object.entries(allChats).forEach(([chatId, messages]) => {
           if (chatId.includes(uid)) {
             const friendUid = chatId.replace(uid, '').replace('_', '');
-            database.ref('users/' + friendUid).once('value').then(snap => {
+            database.ref('chats/' + friendUid + '/profile').once('value').then(snap => {
               const friendProfile = snap.val() || { name: 'Користувач' };
               const msgs = Object.values(messages);
               const lastMsg = msgs[msgs.length - 1] ? msgs[msgs.length - 1].text : '';
