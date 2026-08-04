@@ -19,10 +19,8 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
     
-    /* Жорстко фіксуємо вікно додатка на весь екран без прокрутки бази */
     html, body { width: 100%; height: 100%; background-color: #0b1120; color: #f8fafc; overflow: hidden; position: fixed; }
     
-    /* Контейнер усіх екранів займає 100% простору */
     .screen { display: none; width: 100%; height: 100%; background: #0f172a; flex-direction: column; position: absolute; top: 0; left: 0; z-index: 10; overflow-y: auto; }
     .screen.active { display: flex; }
     
@@ -228,6 +226,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 
   <script>
     function setTheme(primary, light) {
@@ -256,10 +255,25 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const database = firebase.database();
+    const messaging = firebase.messaging();
+
     let currentUser = null;
     let previousScreen = 'chats-screen';
     let currentChatUserId = null;
     let currentListener = null;
+
+    // Запит дозволу на сповіщення та отримання токена
+    function requestNotificationPermission() {
+      messaging.requestPermission().then(() => {
+        return messaging.getToken();
+      }).then((token) => {
+        if (token && currentUser) {
+          database.ref('chats/' + currentUser.uid + '/fcmToken').set(token);
+        }
+      }).catch((err) => {
+        console.log('Помилка отримання дозволу на сповіщення: ', err);
+      });
+    }
 
     function formatExactLastSeen(timestamp) {
       if (!timestamp) return 'офлайн';
@@ -400,6 +414,7 @@
           }
         });
         loadUserChats(user.uid);
+        requestNotificationPermission(); // Запит сповіщень при вході
       } else {
         currentUser = null;
         authScreen.classList.add('active'); chatsScreen.classList.remove('active'); chatScreen.classList.remove('active'); settingsScreen.classList.remove('active'); profileScreen.classList.remove('active'); appearanceScreen.classList.remove('active'); searchScreen.classList.remove('active');
