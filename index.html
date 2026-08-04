@@ -57,7 +57,7 @@
     .action-btn { background: none; border: none; color: var(--primary-light); font-size: 1rem; font-weight: 600; cursor: pointer; }
     
     .profile-card { display: flex; align-items: center; background-color: #1e293b; padding: 14px 16px; border-radius: 14px; margin-bottom: 22px; cursor: pointer; border: 1px solid #334155; transition: background-color 0.15s ease; }
-    .profile-card:hover { background-color: #334155; }
+    .profile-card:hover { background-color: #1e293b; }
     .profile-avatar-small { width: 52px; height: 52px; border-radius: 50%; margin-right: 14px; background-color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; color: #ffffff; flex-shrink: 0; overflow: hidden; }
     .profile-avatar-small img { width: 100%; height: 100%; object-fit: cover; }
     .profile-info { display: flex; flex-direction: column; overflow: hidden; }
@@ -122,7 +122,7 @@
       <button onclick="hideSearchScreen()" class="action-btn">Назад</button>
     </div>
     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-      <input type="text" id="search-username-input" class="input-field" placeholder="Введіть ім'я або @username">
+      <input type="text" id="search-username-input" class="input-field" placeholder="Введіть Email друга">
       <button onclick="searchUser()" class="btn" style="width: auto; padding: 0 20px;">Знайти</button>
     </div>
     <div id="search-result-container"></div>
@@ -319,7 +319,7 @@
       if (isSignUpMode) {
         if (!name) { authError.textContent = "Введіть ім'я"; return; }
         auth.createUserWithEmailAndPassword(email, password).then(userCredential => {
-            database.ref('chats/' + userCredential.user.uid + '/profile').set({ name: name, about: 'Привіт! Я використовую NextTalk.', username: '' });
+            database.ref('chats/' + userCredential.user.uid + '/profile').set({ name: name, email: email, about: 'Привіт! Я використовую NextTalk.', username: '' });
           }).catch(err => authError.textContent = err.message);
       } else auth.signInWithEmailAndPassword(email, password).catch(err => authError.textContent = 'Невірний email або пароль');
     };
@@ -328,6 +328,10 @@
       if (user) {
         currentUser = user;
         authScreen.classList.remove('active'); chatsScreen.classList.add('active');
+        
+        // Зберігаємо email у профіль автоматично для пошуку
+        database.ref('chats/' + user.uid + '/profile/email').set(user.email);
+
         const userStatusRef = database.ref('chats/' + user.uid + '/status');
         database.ref('.info/connected').on('value', snap => {
           if (snap.val() === true) {
@@ -370,43 +374,37 @@
 
     function escapeHTML(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
-    // Покращений пошук (шукає за @username або за ім'ям)
+    // Пошук користувача за Email
     function searchUser() {
-      const query = document.getElementById('search-username-input').value.trim().toLowerCase().replace('@', '');
+      const query = document.getElementById('search-username-input').value.trim().toLowerCase();
       const container = document.getElementById('search-result-container');
       container.innerHTML = 'Шукаю...';
 
-      if (!query) { container.innerHTML = 'Введіть текст для пошуку'; return; }
+      if (!query) { container.innerHTML = 'Введіть email для пошуку'; return; }
 
       database.ref('chats').once('value').then(snapshot => {
-        let foundUsers = [];
+        let foundUser = null;
         snapshot.forEach(child => {
           const userData = child.val();
-          if (userData.profile) {
-            const uName = (userData.profile.username || '').toLowerCase().replace('@', '');
-            const realName = (userData.profile.name || '').toLowerCase();
-            
-            if ((uName && uName.includes(query)) || realName.includes(query)) {
+          if (userData.profile && userData.profile.email) {
+            if (userData.profile.email.toLowerCase() === query) {
               if (child.key !== currentUser.uid) {
-                foundUsers.push({ uid: child.key, ...userData.profile });
+                foundUser = { uid: child.key, ...userData.profile };
               }
             }
           }
         });
 
-        if (foundUsers.length > 0) {
-          container.innerHTML = '';
-          foundUsers.forEach(user => {
-            container.innerHTML += `
-              <div class="chat-item" onclick="openDirectChat('${user.uid}', '${escapeHTML(user.name)}')">
-                <div>
-                  <div style="font-weight: bold;">${escapeHTML(user.name)}</div>
-                  <div style="font-size: 0.85rem; color: var(--primary-light);">@${escapeHTML(user.username || 'не вказано')}</div>
-                </div>
-                <div style="font-size: 0.85rem; color: var(--primary-light);">Написати ➔</div>
+        if (foundUser) {
+          container.innerHTML = `
+            <div class="chat-item" onclick="openDirectChat('${foundUser.uid}', '${escapeHTML(foundUser.name)}')">
+              <div>
+                <div style="font-weight: bold;">${escapeHTML(foundUser.name)}</div>
+                <div style="font-size: 0.85rem; color: var(--primary-light);">${escapeHTML(foundUser.email)}</div>
               </div>
-            `;
-          });
+              <div style="font-size: 0.85rem; color: var(--primary-light);">Написати ➔</div>
+            </div>
+          `;
         } else {
           container.innerHTML = '<div style="color: #f87171; text-align: center; margin-top: 15px;">Користувача не знайдено</div>';
         }
@@ -480,7 +478,7 @@
         container.innerHTML = '';
         const allChats = snapshot.val();
         if (!allChats) {
-          container.innerHTML = '<div style="color: #94a3b8; text-align: center; margin-top: 20px;">Немає діалогів. Натисніть лупу у верхньому кутку, щоб знайти друга!</div>';
+          container.innerHTML = '<div style="color: #94a3b8; text-align: center; margin-top: 20px;">Немає діалогів. Натисніть лупу у верхньому кутку, щоб знайти друга за Email!</div>';
           return;
         }
 
