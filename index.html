@@ -18,8 +18,10 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: #0b1120; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-    .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: #0f172a; flex-direction: column; position: relative; overflow-y: auto; }
+    body { background-color: #0b1120; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+    
+    /* Виправлені стилі екранів для повноекранного режиму */
+    .screen { display: none; width: 100%; max-width: 450px; height: 100vh; background: #0f172a; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 10; overflow-y: auto; }
     .screen.active { display: flex; }
     
     .auth-container { padding: 2rem; display: flex; flex-direction: column; justify-content: center; height: 100%; gap: 1rem; }
@@ -30,7 +32,7 @@
     .btn-secondary { background: transparent; color: #94a3b8; margin-top: 5px; }
     .error-msg { color: #f87171; font-size: 0.9rem; text-align: center; }
     
-    .chat-header { padding: 15px; background: #0f172a; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; }
+    .chat-header { padding: 15px; background: #0f172a; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; flex-shrink: 0; }
     .chat-title { font-weight: bold; font-size: 1.2rem; color: var(--primary-light); }
     .status-text { font-size: 0.8rem; color: #94a3b8; transition: color 0.2s; }
     .status-text.online { color: #22c55e; }
@@ -47,7 +49,7 @@
     .msg.admin { align-self: flex-start; background: #1e293b; color: white; border-bottom-left-radius: 2px; border: 1px solid #334155; }
     .msg-meta { font-size: 0.7rem; opacity: 0.7; text-align: right; margin-top: 4px; display: flex; justify-content: flex-end; gap: 4px; }
     
-    .chat-input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; border-top: 1px solid #1e293b; }
+    .chat-input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; border-top: 1px solid #1e293b; flex-shrink: 0; }
     .chat-input-area input { flex: 1; }
     .chat-input-area button { width: auto; padding: 0 20px; }
     
