@@ -13,12 +13,12 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Обробка сповіщень у фоновому режимі
-messaging.onBackgroundMessage((payload) => {
+// Обробка фонових повідомлень
+messaging.onBackgroundMessage(function(payload) {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: payload.notification.icon || 'mmm.jpg'
+    icon: 'app-icon.png'
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
