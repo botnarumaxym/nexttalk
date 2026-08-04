@@ -91,7 +91,6 @@
     .status-text.online { color: #22c55e; }
     .status-text.typing { color: #38bdf8; font-style: italic; }
 
-    /* Клікабельний заголовок чату */
     .chat-header-user {
       text-align: center;
       cursor: pointer;
@@ -99,9 +98,7 @@
       border-radius: 8px;
       transition: background-color 0.2s ease;
     }
-    .chat-header-user:hover {
-      background-color: #1e293b;
-    }
+    .chat-header-user:hover { background-color: #1e293b; }
 
     .chat-item {
       background: #1e293b;
@@ -142,46 +139,22 @@
     .chat-input-area button { width: auto; padding: 0 20px; }
 
     /* --- 3. Налаштування --- */
-    #settings-screen {
-      padding: 20px;
-      background: #0f172a;
-    }
-    .settings-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
+    #settings-screen { padding: 20px; background: #0f172a; }
+    .settings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .settings-title { font-size: 1.4rem; font-weight: 700; color: #ffffff; }
     .action-btn { background: none; border: none; color: #38bdf8; font-size: 1rem; font-weight: 600; cursor: pointer; }
 
     .profile-card {
-      display: flex;
-      align-items: center;
-      background-color: #1e293b;
-      padding: 14px 16px;
-      border-radius: 14px;
-      margin-bottom: 22px;
-      cursor: pointer;
-      border: 1px solid #334155;
-      transition: background-color 0.15s ease;
+      display: flex; align-items: center; background-color: #1e293b;
+      padding: 14px 16px; border-radius: 14px; margin-bottom: 22px; cursor: pointer;
+      border: 1px solid #334155; transition: background-color 0.15s ease;
     }
     .profile-card:hover { background-color: #334155; }
 
     .profile-avatar-small {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      margin-right: 14px;
-      background-color: #0284c7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #ffffff;
-      flex-shrink: 0;
-      overflow: hidden;
+      width: 52px; height: 52px; border-radius: 50%; margin-right: 14px;
+      background-color: #0284c7; display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: bold; color: #ffffff; flex-shrink: 0; overflow: hidden;
     }
     .profile-avatar-small img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -191,117 +164,38 @@
 
     .settings-list { display: flex; flex-direction: column; gap: 2px; }
     .settings-item {
-      display: flex;
-      align-items: center;
-      padding: 12px 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      color: #f8fafc;
-      font-size: 0.95rem;
-      transition: background-color 0.15s ease;
+      display: flex; align-items: center; padding: 12px 14px; border-radius: 12px;
+      cursor: pointer; color: #f8fafc; font-size: 0.95rem; transition: background-color 0.15s ease;
     }
     .settings-item:hover { background-color: #1e293b; }
     .settings-icon { width: 22px; height: 22px; margin-right: 16px; color: #38bdf8; flex-shrink: 0; }
 
     /* --- 4. Екран «Профіль» --- */
-    #profile-screen {
-      padding: 20px;
-      background: #0f172a;
-    }
-    .profile-screen-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      margin-bottom: 24px;
-    }
-    .profile-screen-header .back-btn {
-      position: absolute;
-      left: 0;
-      background: none;
-      border: none;
-      color: #ffffff;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-    .profile-screen-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #ffffff;
-    }
+    #profile-screen { padding: 20px; background: #0f172a; }
+    .profile-screen-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px; }
+    .profile-screen-header .back-btn { position: absolute; left: 0; background: none; border: none; color: #ffffff; font-size: 1.2rem; cursor: pointer; }
+    .profile-screen-title { font-size: 1.1rem; font-weight: 600; color: #ffffff; }
 
-    .avatar-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 30px;
-    }
+    .avatar-section { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
     .profile-avatar-large {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background-color: #0284c7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      font-weight: bold;
-      color: #ffffff;
-      overflow: hidden;
-      margin-bottom: 12px;
+      width: 90px; height: 90px; border-radius: 50%; background-color: #0284c7;
+      display: flex; align-items: center; justify-content: center; font-size: 2rem;
+      font-weight: bold; color: #ffffff; overflow: hidden; margin-bottom: 12px;
     }
     .profile-avatar-large img { width: 100%; height: 100%; object-fit: cover; }
 
     .change-photo-btn {
-      background: #1e293b;
-      color: #38bdf8;
-      border: 1px solid #334155;
-      padding: 8px 16px;
-      border-radius: 18px;
-      font-size: 0.88rem;
-      font-weight: 500;
-      cursor: pointer;
+      background: #1e293b; color: #38bdf8; border: 1px solid #334155; padding: 8px 16px;
+      border-radius: 18px; font-size: 0.88rem; font-weight: 500; cursor: pointer;
     }
     .change-photo-btn:hover { background: #334155; }
 
-    .profile-fields {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .field-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 4px 0;
-      cursor: pointer;
-    }
-    .field-icon {
-      width: 22px;
-      height: 22px;
-      color: #38bdf8;
-      flex-shrink: 0;
-    }
-    .field-value {
-      font-size: 0.98rem;
-      color: #ffffff;
-      font-weight: 500;
-    }
-
-    .field-subtext {
-      font-size: 0.82rem;
-      color: #94a3b8;
-      line-height: 1.35;
-      margin-left: 38px;
-      margin-top: -6px;
-    }
-
-    .divider {
-      height: 1px;
-      background-color: #1e293b;
-      margin: 10px 0 10px 38px;
-    }
+    .profile-fields { display: flex; flex-direction: column; gap: 18px; }
+    .field-row { display: flex; align-items: center; gap: 16px; padding: 4px 0; cursor: pointer; }
+    .field-icon { width: 22px; height: 22px; color: #38bdf8; flex-shrink: 0; }
+    .field-value { font-size: 0.98rem; color: #ffffff; font-weight: 500; }
+    .field-subtext { font-size: 0.82rem; color: #94a3b8; line-height: 1.35; margin-left: 38px; margin-top: -6px; }
+    .divider { height: 1px; background-color: #1e293b; margin: 10px 0 10px 38px; }
   </style>
 </head>
 <body>
@@ -343,13 +237,10 @@
   <div id="chat-screen" class="screen">
     <div class="chat-header">
       <button id="back-btn" style="background:none; border:none; color:white; cursor:pointer; font-size:1.1rem;">← Назад</button>
-      
-      <!-- НА ТИСК НА "МАКСИМ" ВЕДЕ В ПРОФІЛЬ 👇 -->
       <div id="chat-header-user" class="chat-header-user" onclick="showProfileFromChat()">
         <div style="font-weight: bold;">Максим</div>
         <div id="typing-status" class="status-text">завантаження...</div>
       </div>
-      
       <div style="width: 30px;"></div>
     </div>
 
@@ -367,7 +258,6 @@
       <div class="settings-title">Налаштування</div>
       <button id="close-settings-btn" class="action-btn">Готово</button>
     </div>
-
     <div class="profile-card" onclick="showProfileScreen()">
       <div id="user-avatar-small" class="profile-avatar-small">К</div>
       <div class="profile-info">
@@ -375,7 +265,6 @@
         <span id="user-display-phone-settings" class="profile-phone">Не вказано</span>
       </div>
     </div>
-
     <div class="settings-list">
       <div class="settings-item" onclick="alert('Розділ у розробці')">
         <svg class="settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -402,12 +291,10 @@
       <button class="back-btn" onclick="hideProfileScreen()">←</button>
       <div class="profile-screen-title">Профіль</div>
     </div>
-
     <div class="avatar-section">
       <div id="user-avatar-large" class="profile-avatar-large">К</div>
       <button class="change-photo-btn" onclick="changeAvatarUrl()">Змінити фото</button>
     </div>
-
     <div class="profile-fields">
       <div>
         <div class="field-row" onclick="editName()">
@@ -415,7 +302,6 @@
           <span id="profile-name-val" class="field-value">Користувач</span>
         </div>
       </div>
-
       <div>
         <div class="field-row" onclick="editAbout()">
           <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
@@ -423,15 +309,13 @@
         </div>
         <p class="field-subtext">Ваш профіль і зміни в ньому бачать ваші співрозмовники, контакти й групи.</p>
       </div>
-
       <div class="divider"></div>
-
       <div>
         <div class="field-row" onclick="editUsername()">
           <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path></svg>
           <span id="profile-username-val" class="field-value">Ім'я користувача</span>
         </div>
-        <p class="field-subtext">Тепер люди можуть писати вам, знаючи ваше ім'я користувача. Його можна створити в разі потреби не повідомляти свого номера телефону.</p>
+        <p class="field-subtext">Тепер люди можуть писати вам, знаючи ваше ім'я користувача.</p>
       </div>
     </div>
   </div>
@@ -457,7 +341,7 @@
     const database = firebase.database();
 
     let currentUser = null;
-    let previousScreen = 'chats-screen'; // Запам'ятовуємо, звідки прийшли
+    let previousScreen = 'chats-screen';
 
     function formatExactLastSeen(timestamp) {
       if (!timestamp) return 'офлайн';
@@ -477,21 +361,18 @@
     document.getElementById('open-settings-btn').onclick = () => { chatsScreen.classList.remove('active'); settingsScreen.classList.add('active'); };
     document.getElementById('close-settings-btn').onclick = () => { settingsScreen.classList.remove('active'); chatsScreen.classList.add('active'); };
 
-    // Відкрити профіль з Налаштувань
     function showProfileScreen() {
       previousScreen = 'settings-screen';
       settingsScreen.classList.remove('active');
       profileScreen.classList.add('active');
     }
 
-    // Перехід у Профіль прямо з ЧАТУ! 👇
     function showProfileFromChat() {
       previousScreen = 'chat-screen';
       chatScreen.classList.remove('active');
       profileScreen.classList.add('active');
     }
 
-    // Повернення назад з Профілю
     function hideProfileScreen() {
       profileScreen.classList.remove('active');
       if (previousScreen === 'chat-screen') {
@@ -581,7 +462,6 @@
 
           document.getElementById('user-display-name-settings').textContent = name;
           document.getElementById('user-display-phone-settings').textContent = phone;
-
           document.getElementById('profile-name-val').textContent = name;
           document.getElementById('profile-about-val').textContent = about;
           document.getElementById('profile-username-val').textContent = username;
@@ -612,7 +492,6 @@
 
     document.getElementById('logout-btn').onclick = () => auth.signOut();
 
-    // Редагування профілю
     function editName() {
       const current = document.getElementById('profile-name-val').textContent;
       const newName = prompt("Введіть ім'я:", current);
@@ -642,6 +521,13 @@
       if (url !== null && currentUser) {
         database.ref('chats/' + currentUser.uid + '/profile').update({ avatarUrl: url });
       }
+    }
+
+    // Функція для захисту від шкідливого коду (XSS)
+    function escapeHTML(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     // Логіка чату
@@ -700,7 +586,11 @@
           const isMe = msg.sender === 'user';
           const msgDiv = document.createElement('div');
           msgDiv.className = 'msg ' + (isMe ? 'user' : 'admin');
-          msgDiv.innerHTML = `<span>${msg.text}</span><div class="msg-meta"><span>${msg.timestamp || ''}</span></div>`;
+          
+          // ТЕПЕР ТУТ БЕЗПЕЧНЕ ВИВЕДЕННЯ ТЕКСТУ
+          const safeText = escapeHTML(msg.text);
+          msgDiv.innerHTML = `<span>${safeText}</span><div class="msg-meta"><span>${msg.timestamp || ''}</span></div>`;
+          
           messagesContainer.appendChild(msgDiv);
         });
 
