@@ -38,7 +38,7 @@
     .chat-header-user { text-align: center; cursor: pointer; padding: 4px 12px; border-radius: 8px; transition: background-color 0.2s ease; }
     .chat-header-user:hover { background-color: #1e293b; }
     
-    .chat-item { background: #1e293b; padding: 15px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; transition: background 0.15s; }
+    .chat-item { background: #1e293b; padding: 15px; border-radius: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; transition: background 0.15s; margin-bottom: 10px; }
     .chat-item:hover { background: #334155; }
     
     .messages-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0f172a; }
@@ -51,7 +51,7 @@
     .chat-input-area input { flex: 1; }
     .chat-input-area button { width: auto; padding: 0 20px; }
     
-    #settings-screen { padding: 20px; background: #0f172a; }
+    #settings-screen, #search-screen { padding: 20px; background: #0f172a; }
     .settings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .settings-title { font-size: 1.4rem; font-weight: 700; color: #ffffff; }
     .action-btn { background: none; border: none; color: var(--primary-light); font-size: 1rem; font-weight: 600; cursor: pointer; }
@@ -105,30 +105,39 @@
     </div>
   </div>
 
+  <!-- Екран чатів -->
   <div id="chats-screen" class="screen">
     <div class="chat-header">
       <span class="chat-title">NextTalk</span>
       <div>
+        <button id="open-search-btn" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem; margin-right: 15px;" title="Знайти друга">🔍</button>
         <button id="open-settings-btn" style="background:none; border:none; color:white; cursor:pointer; font-size:1.3rem;">⚙️</button>
         <button id="logout-btn" style="background:none; border:none; color:#f87171; cursor:pointer; margin-left:10px;">Вийти</button>
       </div>
     </div>
-    <div style="padding: 15px;">
-      <div id="open-chat-btn" class="chat-item">
-        <div>
-          <div style="font-weight: bold;">Максим</div>
-          <div id="list-preview" style="font-size: 0.85rem; color: #94a3b8; margin-top: 3px;">Немає повідомлень</div>
-        </div>
-        <div id="list-time" style="font-size: 0.75rem; color: #64748b;"></div>
-      </div>
+    <div style="padding: 15px;" id="chats-list-container">
+      <!-- Тут будуть з'являтися чати з друзями -->
     </div>
+  </div>
+
+  <!-- Новий екран пошуку друзів -->
+  <div id="search-screen" class="screen">
+    <div class="settings-header">
+      <div class="settings-title">Пошук друга</div>
+      <button onclick="hideSearchScreen()" class="action-btn">Назад</button>
+    </div>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+      <input type="text" id="search-username-input" class="input-field" placeholder="Введіть @username">
+      <button onclick="searchUser()" class="btn" style="width: auto; padding: 0 20px;">Знайти</button>
+    </div>
+    <div id="search-result-container"></div>
   </div>
 
   <div id="chat-screen" class="screen">
     <div class="chat-header">
       <button id="back-btn" style="background:none; border:none; color:white; cursor:pointer; font-size:1.1rem;">← Назад</button>
       <div id="chat-header-user" class="chat-header-user" onclick="showProfileFromChat()">
-        <div style="font-weight: bold;">Максим</div>
+        <div id="active-chat-name" style="font-weight: bold;">Користувач</div>
         <div id="typing-status" class="status-text">завантаження...</div>
       </div>
       <div style="width: 30px;"></div>
@@ -174,17 +183,11 @@
       <p style="font-size: 0.85rem; color: #94a3b8;">Оберіть головний колір для вашого додатка.</p>
       
       <div class="color-swatches">
-        <!-- Синій -->
         <div class="color-swatch" style="background: #0284c7;" onclick="setTheme('#0284c7', '#38bdf8')"></div>
-        <!-- Зелений -->
         <div class="color-swatch" style="background: #16a34a;" onclick="setTheme('#16a34a', '#4ade80')"></div>
-        <!-- Фіолетовий -->
         <div class="color-swatch" style="background: #9333ea;" onclick="setTheme('#9333ea', '#c084fc')"></div>
-        <!-- Рожевий (ДОДАНО) -->
         <div class="color-swatch" style="background: #db2777;" onclick="setTheme('#db2777', '#f472b6')"></div>
-        <!-- Помаранчевий -->
         <div class="color-swatch" style="background: #ea580c;" onclick="setTheme('#ea580c', '#fb923c')"></div>
-        <!-- Червоний -->
         <div class="color-swatch" style="background: #dc2626;" onclick="setTheme('#dc2626', '#f87171')"></div>
       </div>
     </div>
@@ -257,6 +260,8 @@
     const database = firebase.database();
     let currentUser = null;
     let previousScreen = 'chats-screen';
+    let currentChatUserId = null;
+    let currentListener = null;
 
     function formatExactLastSeen(timestamp) {
       if (!timestamp) return 'офлайн';
@@ -277,12 +282,13 @@
     const settingsScreen = document.getElementById('settings-screen');
     const profileScreen = document.getElementById('profile-screen');
     const appearanceScreen = document.getElementById('appearance-screen');
+    const searchScreen = document.getElementById('search-screen');
     const authScreen = document.getElementById('auth-screen');
 
-    document.getElementById('open-chat-btn').onclick = () => { chatsScreen.classList.remove('active'); chatScreen.classList.add('active'); };
     document.getElementById('back-btn').onclick = () => { chatScreen.classList.remove('active'); chatsScreen.classList.add('active'); };
     document.getElementById('open-settings-btn').onclick = () => { chatsScreen.classList.remove('active'); settingsScreen.classList.add('active'); };
     document.getElementById('close-settings-btn').onclick = () => { settingsScreen.classList.remove('active'); chatsScreen.classList.add('active'); };
+    document.getElementById('open-search-btn').onclick = () => { chatsScreen.classList.remove('active'); searchScreen.classList.add('active'); };
 
     function showProfileScreen() { previousScreen = 'settings-screen'; settingsScreen.classList.remove('active'); profileScreen.classList.add('active'); }
     function showProfileFromChat() { previousScreen = 'chat-screen'; chatScreen.classList.remove('active'); profileScreen.classList.add('active'); }
@@ -294,6 +300,7 @@
 
     function showAppearanceScreen() { settingsScreen.classList.remove('active'); appearanceScreen.classList.add('active'); }
     function hideAppearanceScreen() { appearanceScreen.classList.remove('active'); settingsScreen.classList.add('active'); }
+    function hideSearchScreen() { searchScreen.classList.remove('active'); chatsScreen.classList.add('active'); }
 
     const authTitle = document.getElementById('auth-desc');
     const authName = document.getElementById('auth-name');
@@ -319,7 +326,7 @@
       if (isSignUpMode) {
         if (!name) { authError.textContent = "Введіть ім'я"; return; }
         auth.createUserWithEmailAndPassword(email, password).then(userCredential => {
-            database.ref('chats/' + userCredential.user.uid + '/profile').set({ name: name, phone: 'Не вказано', about: 'Привіт! Я використовую NextTalk.', username: '' });
+            database.ref('users/' + userCredential.user.uid).set({ name: name, username: '', phone: 'Не вказано', about: 'Привіт!' });
           }).catch(err => authError.textContent = err.message);
       } else auth.signInWithEmailAndPassword(email, password).catch(err => authError.textContent = 'Невірний email або пароль');
     };
@@ -328,7 +335,7 @@
       if (user) {
         currentUser = user;
         authScreen.classList.remove('active'); chatsScreen.classList.add('active');
-        const userStatusRef = database.ref('chats/' + user.uid + '/status');
+        const userStatusRef = database.ref('users/' + user.uid + '/status');
         database.ref('.info/connected').on('value', snap => {
           if (snap.val() === true) {
             userStatusRef.onDisconnect().set({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
@@ -336,7 +343,7 @@
           }
         });
 
-        database.ref('chats/' + user.uid + '/profile').on('value', snapshot => {
+        database.ref('users/' + user.uid).on('value', snapshot => {
           const profile = snapshot.val() || {};
           const name = profile.name || "Користувач";
           document.getElementById('user-display-name-settings').textContent = name;
@@ -355,65 +362,101 @@
             smallAvatar.innerHTML = initial; largeAvatar.innerHTML = initial;
           }
         });
-        initChatLogic(user.uid);
+        loadUserChats(user.uid);
       } else {
         currentUser = null;
-        authScreen.classList.add('active'); chatsScreen.classList.remove('active'); chatScreen.classList.remove('active'); settingsScreen.classList.remove('active'); profileScreen.classList.remove('active'); appearanceScreen.classList.remove('active');
+        authScreen.classList.add('active'); chatsScreen.classList.remove('active'); chatScreen.classList.remove('active'); settingsScreen.classList.remove('active'); profileScreen.classList.remove('active'); appearanceScreen.classList.remove('active'); searchScreen.classList.remove('active');
       }
     });
 
     document.getElementById('logout-btn').onclick = () => auth.signOut();
 
-    function editName() { const current = document.getElementById('profile-name-val').textContent; const newName = prompt("Введіть ім'я:", current); if (newName && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ name: newName }); }
-    function editAbout() { const current = document.getElementById('profile-about-val').textContent; const newAbout = prompt("Введіть статус / інформацію:", current); if (newAbout !== null && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ about: newAbout }); }
-    function editUsername() { const current = document.getElementById('profile-username-val').textContent; const newUsername = prompt("Введіть ім'я користувача (@username):", current); if (newUsername !== null && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ username: newUsername }); }
-    function changeAvatarUrl() { const url = prompt("Введіть посилання (URL) на нове фото:"); if (url !== null && currentUser) database.ref('chats/' + currentUser.uid + '/profile').update({ avatarUrl: url }); }
+    function editName() { const current = document.getElementById('profile-name-val').textContent; const newName = prompt("Введіть ім'я:", current); if (newName && currentUser) database.ref('users/' + currentUser.uid).update({ name: newName }); }
+    function editAbout() { const current = document.getElementById('profile-about-val').textContent; const newAbout = prompt("Введіть статус / інформацію:", current); if (newAbout !== null && currentUser) database.ref('users/' + currentUser.uid).update({ about: newAbout }); }
+    function editUsername() { const current = document.getElementById('profile-username-val').textContent; const newUsername = prompt("Введіть ім'я користувача (@username):", current); if (newUsername !== null && currentUser) database.ref('users/' + currentUser.uid).update({ username: newUsername }); }
+    function changeAvatarUrl() { const url = prompt("Введіть посилання (URL) на нове фото:"); if (url !== null && currentUser) database.ref('users/' + currentUser.uid).update({ avatarUrl: url }); }
 
     function escapeHTML(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
-    function initChatLogic(uid) {
+    // Пошук користувача за @username
+    function searchUser() {
+      const query = document.getElementById('search-username-input').value.trim().replace('@', '');
+      const container = document.getElementById('search-result-container');
+      container.innerHTML = 'Шукаю...';
+
+      if (!query) { container.innerHTML = 'Введіть ім\'я для пошуку'; return; }
+
+      database.ref('users').once('value').then(snapshot => {
+        let foundUser = null;
+        snapshot.forEach(child => {
+          const userData = child.val();
+          if (userData.username && userData.username.toLowerCase().replace('@', '') === query.toLowerCase()) {
+            if (child.key !== currentUser.uid) {
+              foundUser = { uid: child.key, ...userData };
+            }
+          }
+        });
+
+        if (foundUser) {
+          container.innerHTML = `
+            <div class="chat-item" onclick="openDirectChat('${foundUser.uid}', '${escapeHTML(foundUser.name)}')">
+              <div>
+                <div style="font-weight: bold;">${escapeHTML(foundUser.name)}</div>
+                <div style="font-size: 0.85rem; color: #38bdf8;">@${escapeHTML(foundUser.username)}</div>
+              </div>
+              <div style="font-size: 0.85rem; color: var(--primary-light);">Написати ➔</div>
+            </div>
+          `;
+        } else {
+          container.innerHTML = '<div style="color: #f87171;">Користувача не знайдено</div>';
+        }
+      });
+    }
+
+    function getChatId(uid1, uid2) {
+      return uid1 < uid2 ? uid1 + '_' + uid2 : uid2 + '_' + uid1;
+    }
+
+    function openDirectChat(friendUid, friendName) {
+      currentChatUserId = friendUid;
+      searchScreen.classList.remove('active');
+      chatScreen.classList.add('active');
+      document.getElementById('active-chat-name').textContent = friendName;
+
+      const chatId = getChatId(currentUser.uid, friendUid);
       const messagesContainer = document.getElementById('messages-container');
       const messageInput = document.getElementById('message-input');
       const sendBtn = document.getElementById('send-btn');
       const typingStatus = document.getElementById('typing-status');
-      const listPreview = document.getElementById('list-preview');
-      const listTime = document.getElementById('list-time');
-      let typingTimeout = null;
 
-      messageInput.oninput = () => {
-        database.ref('chats/' + uid + '/userTyping').set(true);
-        clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => database.ref('chats/' + uid + '/userTyping').set(false), 1500);
-      };
+      if (currentListener) database.ref(currentListener).off();
+      currentListener = 'direct_messages/' + chatId;
 
-      database.ref('chats/' + uid + '/adminTyping').on('value', snapshot => {
-        if (snapshot.val() === true) { typingStatus.textContent = 'друкує...'; typingStatus.className = 'status-text typing'; } 
-        else {
-          database.ref('admin/status').on('value', statusSnap => {
-            const st = statusSnap.val();
-            if (st && st.online) { typingStatus.textContent = 'онлайн'; typingStatus.className = 'status-text online'; } 
-            else if (st && st.lastSeen) { typingStatus.textContent = formatExactLastSeen(st.lastSeen); typingStatus.className = 'status-text'; } 
-            else { typingStatus.textContent = 'офлайн'; typingStatus.className = 'status-text'; }
-          });
+      // Статус друга
+      database.ref('users/' + friendUid + '/status').on('value', snap => {
+        const st = snap.val();
+        if (st && st.online) {
+          typingStatus.textContent = 'онлайн';
+          typingStatus.className = 'status-text online';
+        } else if (st && st.lastSeen) {
+          typingStatus.textContent = formatExactLastSeen(st.lastSeen);
+          typingStatus.className = 'status-text';
+        } else {
+          typingStatus.textContent = 'офлайн';
+          typingStatus.className = 'status-text';
         }
       });
 
-      database.ref('chats/' + uid + '/messages').on('value', snapshot => {
+      // Повідомлення
+      database.ref(currentListener).on('value', snapshot => {
         messagesContainer.innerHTML = '';
         const data = snapshot.val();
         if (!data) return;
-        const entries = Object.entries(data);
-        if (entries.length > 0) {
-          const last = entries[entries.length - 1][1];
-          listPreview.textContent = last.text;
-          listTime.textContent = last.timestamp || '';
-        }
-        entries.forEach(([msgId, msg]) => {
-          const isMe = msg.sender === 'user';
+        Object.values(data).forEach(msg => {
+          const isMe = msg.sender === currentUser.uid;
           const msgDiv = document.createElement('div');
           msgDiv.className = 'msg ' + (isMe ? 'user' : 'admin');
-          const safeText = escapeHTML(msg.text);
-          msgDiv.innerHTML = `<span>${safeText}</span><div class="msg-meta"><span>${msg.timestamp || ''}</span></div>`;
+          msgDiv.innerHTML = `<span>${escapeHTML(msg.text)}</span><div class="msg-meta"><span>${msg.timestamp || ''}</span></div>`;
           messagesContainer.appendChild(msgDiv);
         });
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -422,12 +465,51 @@
       function sendMessage() {
         const text = messageInput.value.trim();
         if (!text) return;
-        database.ref('chats/' + uid + '/userTyping').set(false);
-        database.ref('chats/' + uid + '/messages').push({ sender: 'user', text: text, timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) });
+        database.ref('direct_messages/' + chatId).push({
+          sender: currentUser.uid,
+          text: text,
+          timestamp: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+        });
         messageInput.value = '';
       }
+
       sendBtn.onclick = sendMessage;
       messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+    }
+
+    function loadUserChats(uid) {
+      const container = document.getElementById('chats-list-container');
+      database.ref('direct_messages').on('value', snapshot => {
+        container.innerHTML = '';
+        const allChats = snapshot.val();
+        if (!allChats) {
+          container.innerHTML = '<div style="color: #94a3b8; text-align: center; margin-top: 20px;">Немає діалогів. Натисніть лупу у верхньому кутку, щоб знайти друга!</div>';
+          return;
+        }
+
+        Object.entries(allChats).forEach(([chatId, messages]) => {
+          if (chatId.includes(uid)) {
+            const friendUid = chatId.replace(uid, '').replace('_', '');
+            database.ref('users/' + friendUid).once('value').then(snap => {
+              const friendProfile = snap.val() || { name: 'Користувач' };
+              const msgs = Object.values(messages);
+              const lastMsg = msgs[msgs.length - 1] ? msgs[msgs.length - 1].text : '';
+
+              const item = document.createElement('div');
+              item.className = 'chat-item';
+              item.innerHTML = `
+                <div>
+                  <div style="font-weight: bold;">${escapeHTML(friendProfile.name)}</div>
+                  <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 3px;">${escapeHTML(lastMsg)}</div>
+                </div>
+                <div style="font-size: 0.75rem; color: #64748b;">🔗</div>
+              `;
+              item.onclick = () => openDirectChat(friendUid, friendProfile.name);
+              container.appendChild(item);
+            });
+          }
+        });
+      });
     }
   </script>
 </body>
