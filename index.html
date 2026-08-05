@@ -43,9 +43,33 @@
     .msg.admin { align-self: flex-start; background: #1e293b; color: white; border-bottom-left-radius: 2px; border: 1px solid #334155; }
     .msg-meta { font-size: 0.7rem; opacity: 0.7; text-align: right; margin-top: 4px; }
     
-    .chat-input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; border-top: 1px solid #1e293b; flex-shrink: 0; }
+    .chat-input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; border-top: 1px solid #1e293b; flex-shrink: 0; align-items: center; }
     .chat-input-area input { flex: 1; }
-    .chat-input-area button { width: auto; padding: 0 20px; }
+    .chat-input-area button { width: auto; padding: 0 16px; height: 44px; border-radius: 8px; }
+
+    /* Кнопка запису голосового */
+    .voice-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: var(--primary-light);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .voice-btn.recording {
+      background: #ef4444 !important;
+      color: white !important;
+      animation: pulse-voice 1s infinite;
+    }
+
+    @keyframes pulse-voice {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
     
     #settings-screen, #search-screen { padding: 20px; background: #0f172a; }
     .settings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -70,17 +94,12 @@
     .color-swatches { display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
     .color-swatch { width: 45px; height: 45px; border-radius: 50%; cursor: pointer; border: 2px solid #334155; }
 
-    /* --- НОВИЙ ДИЗАЙН ДЛЯ ЕКРАНУ ДЗВІНКА --- */
-    #call-screen {
-      background: linear-gradient(135deg, #0b1120 0%, #1e293b 100%);
-    }
-
+    #call-screen { background: linear-gradient(135deg, #0b1120 0%, #1e293b 100%); }
     @keyframes pulse-ring {
       0% { box-shadow: 0 0 0 0 var(--primary-light); }
       70% { box-shadow: 0 0 0 25px rgba(0, 0, 0, 0); }
       100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
     }
-
     .avatar-calling {
       width: 120px !important; 
       height: 120px !important; 
@@ -90,22 +109,14 @@
       animation: pulse-ring 2s infinite;
     }
     
-    .call-btn {
-      width: 70px; 
-      height: 70px; 
-      border-radius: 50%; 
-      font-size: 2rem; 
-      border: none; 
-      cursor: pointer; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
-      transition: transform 0.2s;
-    }
+    .call-btn { width: 70px; height: 70px; border-radius: 50%; font-size: 2rem; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
     .call-btn:active { transform: scale(0.9); }
     .call-btn.accept { background: #22c55e; color: white; box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4); }
     .call-btn.decline { background: #ef4444; color: white; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); transform: rotate(135deg); }
-    .call-btn.decline:active { transform: scale(0.9) rotate(135deg); }
+
+    /* Стилі для стильного аудіоплеєра у чаті */
+    audio::-webkit-media-controls-panel { background-color: #1e293b; }
+    .msg audio { max-width: 220px; height: 35px; border-radius: 8px; margin-top: 4px; outline: none; }
   </style>
 </head>
 <body>
@@ -157,13 +168,14 @@
         <div id="active-chat-name" style="font-weight: bold;">Користувач</div>
         <div id="typing-status" class="status-text">завантаження...</div>
       </div>
-      <!-- Кнопка дзвінка -->
       <div style="display: flex; align-items: center; width: 30px;">
         <button id="start-call-btn" style="background:none; border:none; color:var(--primary-light); cursor:pointer; font-size:1.3rem; display:none;" title="Зателефонувати">📞</button>
       </div>
     </div>
     <div id="messages-container" class="messages-box"></div>
     <div class="chat-input-area">
+      <!-- Кнопка запису голосового -->
+      <button id="voice-record-btn" class="voice-btn" title="Утримуйте або натисніть для запису">🎙️</button>
       <input type="text" id="message-input" class="input-field" placeholder="Напишіть повідомлення...">
       <button id="send-btn" class="btn">➤</button>
     </div>
@@ -237,7 +249,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
 
   <script>
-    // Теми
     function setTheme(primary, light) {
       document.documentElement.style.setProperty('--primary', primary);
       document.documentElement.style.setProperty('--primary-light', light);
@@ -248,7 +259,6 @@
     const savedLight = localStorage.getItem('themeLight');
     if (savedPrimary && savedLight) setTheme(savedPrimary, savedLight);
 
-    // Ініціалізація Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBuGDd0y2y4Tkf-tcBU_ZshX2uUGK3uQWQ",
       authDomain: "my-website-5d781.firebaseapp.com",
@@ -269,7 +279,6 @@
     let currentListener = null;
     let previousScreen = 'chats-screen';
 
-    // Форматування часу
     function formatExactLastSeen(timestamp) {
       if (!timestamp) return 'офлайн';
       const date = new Date(timestamp);
@@ -284,17 +293,14 @@
       else return 'був(ла) ' + date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' о ' + timeString;
     }
 
-    // XSS захист
     function escapeHTML(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
-    // Сповіщення
     function requestNotificationPermission() {
       messaging.requestPermission().then(() => messaging.getToken()).then((token) => {
         if (token && currentUser) database.ref('chats/' + currentUser.uid + '/fcmToken').set(token);
       }).catch(err => console.log('Помилка сповіщень:', err));
     }
 
-    // UI Навігація
     const screens = ['auth-screen', 'chats-screen', 'search-screen', 'chat-screen', 'settings-screen', 'profile-screen', 'appearance-screen'];
     function switchScreen(screenId) {
       screens.forEach(s => document.getElementById(s).classList.remove('active'));
@@ -327,7 +333,6 @@
     function editAbout() { const a = prompt("Новий статус:"); if (a !== null) database.ref('chats/' + currentUser.uid + '/profile').update({ about: a }); }
     function changeAvatarUrl() { const u = prompt("URL фото:"); if (u !== null) database.ref('chats/' + currentUser.uid + '/profile').update({ avatarUrl: u }); }
 
-    // Авторизація
     let isSignUpMode = false;
     document.getElementById('auth-toggle-btn').onclick = () => {
       isSignUpMode = !isSignUpMode;
@@ -382,7 +387,6 @@
       }
     });
 
-    // Пошук і Чат
     function searchUser() {
       const q = document.getElementById('search-username-input').value.trim().toLowerCase();
       if (!q) return;
@@ -436,8 +440,18 @@
         const data = snap.val();
         if (data) Object.values(data).forEach(m => {
           const isMe = m.sender === currentUser.uid;
-          let textStyle = m.text.includes('📞') ? 'font-weight: bold;' : '';
-          msgsContainer.innerHTML += `<div class="msg ${isMe ? 'user' : 'admin'}"><span style="${textStyle}">${escapeHTML(m.text)}</span><div class="msg-meta">${m.timestamp||''}</div></div>`;
+          const msgDiv = document.createElement('div');
+          msgDiv.className = `msg ${isMe ? 'user' : 'admin'}`;
+          
+          // Рендеринг голосового або звичайного повідомлення
+          if (m.audioUrl) {
+            msgDiv.innerHTML = `<div>🎤 Голосове повідомлення</div><audio src="${m.audioUrl}" controls></audio><div class="msg-meta">${m.timestamp||''}</div>`;
+          } else {
+            let textStyle = m.text && m.text.includes('📞') ? 'font-weight: bold;' : '';
+            msgDiv.innerHTML = `<span style="${textStyle}">${escapeHTML(m.text || '')}</span><div class="msg-meta">${m.timestamp||''}</div>`;
+          }
+          
+          msgsContainer.appendChild(msgDiv);
         });
         msgsContainer.scrollTop = msgsContainer.scrollHeight;
       });
@@ -467,7 +481,9 @@
             database.ref('chats/' + fUid + '/profile').once('value').then(s => {
               const p = s.val() || {name:'Користувач'};
               const mArr = Object.values(msgs);
-              const lastM = mArr[mArr.length - 1]?.text || '';
+              const lastMsgObj = mArr[mArr.length - 1];
+              let lastM = lastMsgObj ? (lastMsgObj.audioUrl ? '🎤 Голосове повідомлення' : lastMsgObj.text) : '';
+              
               const div = document.createElement('div');
               div.className = 'chat-item';
               div.innerHTML = `<div><b>${escapeHTML(p.name)}</b><br><small style="color:gray;">${escapeHTML(lastM)}</small></div>`;
@@ -480,9 +496,67 @@
     }
 
     // ==========================================
+    // ЛОГІКА ГОЛОСОВИХ ПОВІДОМЛЕНЬ (MediaRecorder)
+    // ==========================================
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    const voiceRecordBtn = document.getElementById('voice-record-btn');
+
+    async function toggleVoiceRecord() {
+      if (!currentChatUserId) return;
+
+      if (!isRecording) {
+        // Починаємо запис
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = e => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.readAsDataURL(audioBlob);
+            reader.onloadend = () => {
+              const base64Audio = reader.result;
+              // Відправляємо голосове в базу даних
+              database.ref('direct_messages/' + getChatId(currentUser.uid, currentChatUserId)).push({
+                sender: currentUser.uid,
+                audioUrl: base64Audio,
+                timestamp: new Date().toLocaleTimeString('uk-UA', {hour:'2-digit', minute:'2-digit'})
+              });
+            };
+            // Вимикаємо мікрофон після запису
+            stream.getTracks().forEach(track => track.stop());
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+          voiceRecordBtn.classList.add('recording');
+          voiceRecordBtn.textContent = '⏹️';
+        } catch (err) {
+          alert('Помилка доступу до мікрофона для запису!');
+        }
+      } else {
+        // Зупиняємо запис і відправляємо
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+        isRecording = false;
+        voiceRecordBtn.classList.remove('recording');
+        voiceRecordBtn.textContent = '🎙️';
+      }
+    }
+
+    voiceRecordBtn.onclick = toggleVoiceRecord;
+
+    // ==========================================
     // ЛОГІКА ДЗВІНКІВ (WebRTC + Firebase)
     // ==========================================
-    
     const rtcConfig = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
     let peerConnection = null;
     let localStream = null;
@@ -520,15 +594,14 @@
       peerConnection.onconnectionstatechange = () => {
         if (peerConnection.connectionState === 'connected') {
           callStatus.textContent = "Розмова 🎙️";
-          callStatus.style.color = "#4ade80"; // Зелений колір при з'єднанні
-          callAvatar.classList.remove('avatar-calling'); // Вимикаємо пульсацію під час розмови
+          callStatus.style.color = "#4ade80";
+          callAvatar.classList.remove('avatar-calling');
         } else if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
           endCallUI();
         }
       };
     }
 
-    // 1. ДЗВІНОК
     document.getElementById('start-call-btn').onclick = async () => {
       if (!currentChatUserId) return;
       currentCallNode = currentChatUserId; 
@@ -537,7 +610,6 @@
       callAvatar.classList.add('avatar-calling');
       callStatus.style.color = "var(--primary-light)";
       
-      // Завантажуємо аватарку друга для екрану виклику
       database.ref('chats/' + currentChatUserId + '/profile').once('value').then(snap => {
         const p = snap.val() || {};
         callName.textContent = p.name || "Користувач";
@@ -577,14 +649,13 @@
       });
     };
 
-    // 2. ВХІДНІ ДЗВІНКИ
     function listenForCalls() {
       database.ref(`calls/${currentUser.uid}`).on('value', snapshot => {
         const data = snapshot.val();
         
         if (data && data.offer && !callActive) {
           currentCallNode = currentUser.uid;
-          currentChatUserId = data.callerId; // Зберігаємо ID для чату
+          currentChatUserId = data.callerId;
           callActive = true;
           
           callScreen.classList.add('active');
@@ -594,7 +665,6 @@
           callStatus.textContent = "Вам дзвонять...";
           answerBtn.style.display = 'flex'; 
           
-          // Пробуємо завантажити аватар того, хто дзвонить
           database.ref('chats/' + data.callerId + '/profile/avatarUrl').once('value').then(snap => {
              if (snap.val()) callAvatar.innerHTML = `<img src="${snap.val()}">`;
              else callAvatar.innerHTML = (data.callerName || '📞').charAt(0).toUpperCase();
@@ -607,7 +677,6 @@
       });
     }
 
-    // 3. ПРИЙНЯТИ ДЗВІНОК
     answerBtn.onclick = async () => {
       answerBtn.style.display = 'none';
       callStatus.textContent = "З'єднання...";
@@ -631,7 +700,6 @@
       });
     };
 
-    // 4. ЗАВЕРШИТИ ДЗВІНОК
     document.getElementById('hangup-btn').onclick = () => {
       let msgText = "📞 Дзвінок завершено";
       if (callStatus.textContent === "Дзвонимо..." || callStatus.textContent === "Вам дзвонять...") {
