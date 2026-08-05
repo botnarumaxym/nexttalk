@@ -232,6 +232,21 @@
     let currentListener = null;
     let previousScreen = 'chats-screen';
 
+    // Форматування часу останнього візиту
+    function formatExactLastSeen(timestamp) {
+      if (!timestamp) return 'офлайн';
+      const date = new Date(timestamp);
+      const now = new Date();
+      const isToday = date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+      const yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const isYesterday = date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear();
+      const timeString = date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+      if (isToday) return 'був(ла) сьогодні о ' + timeString;
+      else if (isYesterday) return 'був(ла) вчора о ' + timeString;
+      else return 'був(ла) ' + date.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' о ' + timeString;
+    }
+
     // XSS захист
     function escapeHTML(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
 
@@ -310,7 +325,7 @@
         database.ref('.info/connected').on('value', snap => {
           if (snap.val() === true) {
             statusRef.onDisconnect().set({ online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP });
-            statusRef.set({ online: true });
+            statusRef.set({ online: true, lastSeen: firebase.database.ServerValue.TIMESTAMP });
           }
         });
         
@@ -358,6 +373,21 @@
       switchScreen('chat-screen');
       document.getElementById('active-chat-name').textContent = friendName;
       document.getElementById('start-call-btn').style.display = 'block'; // Показуємо кнопку дзвінка
+      
+      const typingStatus = document.getElementById('typing-status');
+      database.ref('chats/' + friendUid + '/status').on('value', snap => {
+        const st = snap.val();
+        if (st && st.online) {
+          typingStatus.textContent = 'онлайн';
+          typingStatus.className = 'status-text online';
+        } else if (st && st.lastSeen) {
+          typingStatus.textContent = formatExactLastSeen(st.lastSeen);
+          typingStatus.className = 'status-text';
+        } else {
+          typingStatus.textContent = 'офлайн';
+          typingStatus.className = 'status-text';
+        }
+      });
       
       const chatId = getChatId(currentUser.uid, friendUid);
       if (currentListener) database.ref(currentListener).off();
